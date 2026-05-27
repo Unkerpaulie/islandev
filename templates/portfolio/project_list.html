@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfolio — Islan.DEV{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">Portfolio</p>
+  <h1 class="text-4xl font-semibold tracking-tight mb-6">Real Systems. Real Results.</h1>
+  {% if projects %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for project in projects %}
+        <a href="{{ project.get_absolute_url }}" class="block bg-white rounded-xl border border-brand-alloy p-6 hover:border-brand-teal/40 transition-colors">
+          <p class="text-xs text-brand-teal font-medium mb-1">{{ project.client_type }}</p>
+          <h2 class="font-semibold mb-2">{{ project.title }}</h2>
+          <p class="text-sm text-brand-sub">{{ project.description|truncatewords:20 }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-brand-sub">No projects published yet. Add some via the admin.</p>
+  {% endif %}
+</section>
+{% endblock %}

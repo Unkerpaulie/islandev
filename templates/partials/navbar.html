@@ -1,0 +1,13 @@
+{# Placeholder navbar. Will be replaced when the Navbar component is ported. #}
+<nav class="bg-white border-b border-brand-alloy">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="{% url 'core:home' %}" class="font-semibold text-brand-text">Islan.DEV</a>
+    <div class="flex items-center gap-6 text-sm">
+      <a href="{% url 'core:home' %}" class="text-brand-sub hover:text-brand-teal">Home</a>
+      <a href="{% url 'core:services' %}" class="text-brand-sub hover:text-brand-teal">Services</a>
+      <a href="{% url 'portfolio:list' %}" class="text-brand-sub hover:text-brand-teal">Portfolio</a>
+      <a href="{% url 'engagement:contact' %}" class="text-brand-sub hover:text-brand-teal">Contact</a>
+      <a href="{% url 'engagement:book' %}" class="inline-flex items-center px-4 py-2 border border-brand-teal text-brand-teal rounded-lg font-medium hover:bg-brand-teal hover:text-white transition-colors">Book Consultation</a>
+    </div>
+  </div>
+</nav>
