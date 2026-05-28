@@ -1,0 +1,35 @@
+{# Services overview grid for the home page. #}
+<section class="bg-white py-20 border-t border-brand-cyan/10">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-12 max-w-2xl">
+      <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">What I Do</p>
+      <h2 class="text-3xl lg:text-4xl font-semibold text-brand-text tracking-tight mb-4">
+        A Full Spectrum of Digital Services
+      </h2>
+      <p class="text-brand-sub leading-relaxed">
+        From the first conversation to a live, running system — I handle every step of your digital transformation.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for service in services %}
+        <div class="bg-brand-bg rounded-xl p-6 border border-gray-100 hover:border-brand-teal/30 hover:shadow-md transition-all duration-200 group">
+          <div class="w-10 h-10 rounded-lg bg-brand-teal/10 flex items-center justify-center mb-4 group-hover:bg-brand-teal/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              {{ service.icon_svg|safe }}
+            </svg>
+          </div>
+          <h3 class="font-semibold text-brand-text mb-2">{{ service.title }}</h3>
+          <p class="text-sm text-brand-sub leading-relaxed">{{ service.desc }}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-10 text-center">
+      <a href="{% url 'core:services' %}"
+         class="inline-flex items-center gap-2 text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
+        Explore all services in detail
+      </a>
+    </div>
+  </div>
+</section>

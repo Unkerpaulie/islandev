@@ -3,9 +3,48 @@
 {% block title %}Services — Islan.DEV{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-20">
-  <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">Services</p>
-  <h1 class="text-4xl font-semibold tracking-tight mb-6">Everything Your Business Needs to Go Digital</h1>
-  <p class="text-brand-sub max-w-2xl">Placeholder — the full services page will be ported from the redesign.</p>
-</section>
+  {% include 'partials/page_hero.html' with badge='Services' title='Everything Your Business Needs to Go Digital' subtitle='I offer a complete suite of digital transformation services — from the first consultation call through to a live, running system your team actually uses.' %}
+
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="flex flex-col gap-10">
+      {% for service in services %}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 flex flex-col md:flex-row gap-8">
+          <div class="flex-shrink-0">
+            <div class="w-14 h-14 rounded-xl bg-brand-teal/10 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-brand-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                {{ service.icon_svg|safe }}
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <p class="text-xs text-brand-teal font-semibold mb-1">{{ service.tagline }}</p>
+            <h2 class="text-xl font-semibold text-brand-text mb-3">{{ service.title }}</h2>
+            <p class="text-brand-sub leading-relaxed mb-5 text-sm">{{ service.desc_long }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {% for deliverable in service.deliverables %}
+                <div class="flex items-center gap-2 text-sm text-brand-sub">
+                  <div class="w-1.5 h-1.5 rounded-full bg-brand-teal flex-shrink-0"></div>
+                  {{ deliverable }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-14 bg-brand-teal rounded-2xl p-10 text-center">
+      <h3 class="text-2xl font-semibold text-white mb-3">Not sure where to start?</h3>
+      <p class="text-white/80 mb-6 text-sm max-w-md mx-auto">
+        A free consultation is the best first step. We will map out your situation together and I will tell you honestly what you need.
+      </p>
+      <a href="{% url 'engagement:book' %}"
+         class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:text-white transition-all duration-200 text-sm">
+        Book Free Consultation
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  </div>
 {% endblock %}

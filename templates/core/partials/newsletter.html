@@ -1,0 +1,41 @@
+{# Newsletter signup section — posts to engagement:subscribe and redirects back here. #}
+<section id="newsletter" class="bg-brand-teal py-16">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <p class="text-xs font-semibold tracking-widest uppercase text-white/60 mb-3">Free Resources</p>
+    <h2 class="text-2xl lg:text-3xl font-semibold text-white tracking-tight mb-3">
+      Get Free Business and Digitalization Tips
+    </h2>
+    <p class="text-white/80 mb-8 max-w-xl mx-auto text-sm leading-relaxed">
+      Join business owners and operators who receive practical insights on digitizing operations, building better systems, and growing smarter.
+    </p>
+
+    {% if request.GET.subscribed == '1' %}
+      <div class="bg-white/20 rounded-xl px-8 py-5 inline-block">
+        <p class="text-white font-semibold">You are subscribed! Welcome aboard.</p>
+      </div>
+    {% else %}
+      <form method="post" action="{% url 'engagement:subscribe' %}#newsletter"
+            class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Your name" required
+               value="{{ subscriber_form.name.value|default:'' }}"
+               class="flex-1 px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/60 text-sm focus:outline-none focus:border-white">
+        <input type="email" name="email" placeholder="Your email" required
+               value="{{ subscriber_form.email.value|default:'' }}"
+               class="flex-1 px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/60 text-sm focus:outline-none focus:border-white">
+        <button type="submit"
+                class="px-5 py-3 bg-white text-brand-teal font-semibold rounded-lg text-sm flex items-center justify-center gap-2 hover:bg-brand-cyan hover:text-white transition-all duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Subscribe
+        </button>
+      </form>
+      {% if subscriber_form.errors %}
+        <p class="mt-4 text-sm text-white/90">
+          {% for field, errs in subscriber_form.errors.items %}{{ errs|join:" " }}{% endfor %}
+        </p>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>

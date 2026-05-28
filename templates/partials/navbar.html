@@ -1,13 +1,56 @@
-{# Placeholder navbar. Will be replaced when the Navbar component is ported. #}
-<nav class="bg-white border-b border-brand-alloy">
+{% load static %}
+{% with view_name=request.resolver_match.view_name %}
+<nav data-navbar
+     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
   <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="{% url 'core:home' %}" class="font-semibold text-brand-text">Islan.DEV</a>
-    <div class="flex items-center gap-6 text-sm">
-      <a href="{% url 'core:home' %}" class="text-brand-sub hover:text-brand-teal">Home</a>
-      <a href="{% url 'core:services' %}" class="text-brand-sub hover:text-brand-teal">Services</a>
-      <a href="{% url 'portfolio:list' %}" class="text-brand-sub hover:text-brand-teal">Portfolio</a>
-      <a href="{% url 'engagement:contact' %}" class="text-brand-sub hover:text-brand-teal">Contact</a>
-      <a href="{% url 'engagement:book' %}" class="inline-flex items-center px-4 py-2 border border-brand-teal text-brand-teal rounded-lg font-medium hover:bg-brand-teal hover:text-white transition-colors">Book Consultation</a>
+    <a href="{% url 'core:home' %}" class="flex-shrink-0">
+      <img src="{% static 'images/logo-t.png' %}" alt="Islan.DEV" class="h-11 w-auto">
+    </a>
+
+    {# Desktop nav #}
+    <div class="hidden md:flex items-center gap-8">
+      {% for label, name, url in nav_links %}
+        <a href="{{ url }}"
+           class="text-sm font-medium transition-colors duration-200 {% if view_name == name %}text-brand-teal{% else %}text-brand-text hover:text-brand-teal{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
     </div>
+
+    <a href="{% url 'engagement:book' %}"
+       class="hidden md:inline-flex items-center px-5 py-2.5 rounded-lg border-2 border-brand-teal text-brand-teal text-sm font-semibold transition-all duration-200 hover:bg-brand-cyan hover:border-brand-cyan hover:text-white">
+      Book Free Consultation
+    </a>
+
+    {# Mobile menu button #}
+    <button type="button"
+            data-mobile-toggle
+            aria-controls="mobile-panel"
+            aria-expanded="false"
+            aria-label="Toggle navigation menu"
+            class="md:hidden p-2 text-brand-text">
+      <svg data-icon-open xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+      <svg data-icon-close xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/>
+      </svg>
+    </button>
+  </div>
+
+  {# Mobile panel #}
+  <div id="mobile-panel" data-mobile-panel
+       class="hidden md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
+    {% for label, name, url in nav_links %}
+      <a href="{{ url }}"
+         class="block text-sm font-medium py-1 {% if view_name == name %}text-brand-teal{% else %}text-brand-text{% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+    <a href="{% url 'engagement:book' %}"
+       class="mt-2 flex justify-center items-center px-5 py-2.5 rounded-lg border-2 border-brand-teal text-brand-teal text-sm font-semibold">
+      Book Free Consultation
+    </a>
   </div>
 </nav>
+{% endwith %}

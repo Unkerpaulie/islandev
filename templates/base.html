@@ -14,12 +14,17 @@
 <body class="min-h-screen flex flex-col bg-brand-bg text-brand-text font-sans">
   {% include 'partials/navbar.html' %}
 
-  <main class="flex-1">
+  {# Pages with a full-bleed hero override main_class to remove top padding. #}
+  <main class="flex-1 {% block main_class %}pt-16{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 
   {% include 'partials/footer.html' %}
 
+  <script src="{% static 'js/site.js' %}" defer></script>
+  {# Alpine.js for small interactive pieces (portfolio carousel, contact portals, multi-step book form).
+     Loaded from CDN with defer — Alpine handles its own deferred init. #}
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   {% block extra_body %}{% endblock %}
 </body>
 </html>

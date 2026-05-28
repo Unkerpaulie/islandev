@@ -3,21 +3,88 @@
 {% block title %}Portfolio — Islan.DEV{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-20">
-  <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">Portfolio</p>
-  <h1 class="text-4xl font-semibold tracking-tight mb-6">Real Systems. Real Results.</h1>
-  {% if projects %}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for project in projects %}
-        <a href="{{ project.get_absolute_url }}" class="block bg-white rounded-xl border border-brand-alloy p-6 hover:border-brand-teal/40 transition-colors">
-          <p class="text-xs text-brand-teal font-medium mb-1">{{ project.client_type }}</p>
-          <h2 class="font-semibold mb-2">{{ project.title }}</h2>
-          <p class="text-sm text-brand-sub">{{ project.description|truncatewords:20 }}</p>
-        </a>
-      {% endfor %}
+  {% include 'partials/page_hero.html' with badge='Portfolio' title='Real Systems. Real Results.' subtitle='Every project below is a custom-built system delivered for a real business. Each one started with a problem and ended with a solution the team actually uses every day.' %}
+
+  <div class="max-w-7xl mx-auto px-6 py-16 flex flex-col gap-16">
+    {% for project in projects %}
+      <article class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          {# Text column. Order is swapped on odd-index projects for visual rhythm. #}
+          <div class="p-8 {% cycle '' 'lg:order-2' %}">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2.5 py-1 rounded-full">{{ project.client_type }}</span>
+              {% for tech in project.tech_stack %}
+                <span class="text-xs text-brand-sub bg-gray-100 px-2.5 py-1 rounded-full">{{ tech }}</span>
+              {% endfor %}
+            </div>
+            <h2 class="text-2xl font-semibold text-brand-text mb-4">{{ project.title }}</h2>
+            <p class="text-sm text-brand-sub leading-relaxed mb-6">{{ project.description }}</p>
+            <div class="space-y-2">
+              {% for highlight in project.highlights %}
+                <div class="flex items-start gap-2 text-sm text-brand-sub">
+                  <div class="w-1.5 h-1.5 rounded-full bg-brand-teal mt-1.5 flex-shrink-0"></div>
+                  {{ highlight }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# Image carousel column. Alpine drives the `current` index; images are
+             stacked absolutely and fade in/out on opacity. #}
+          <div class="p-6 bg-brand-bg flex items-center {% cycle '' 'lg:order-1' %}">
+            <div x-data="{ current: 0, total: {{ project.image_urls|length }} }"
+                 class="relative rounded-xl overflow-hidden bg-gray-100 group w-full h-64">
+              {% for url in project.image_urls %}
+                <img src="{{ url }}" alt="{{ project.title }} screenshot {{ forloop.counter }}"
+                     class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                     :class="current === {{ forloop.counter0 }} ? 'opacity-100' : 'opacity-0'">
+              {% endfor %}
+
+              {% if project.image_urls|length > 1 %}
+                <button type="button"
+                        @click="current = (current - 1 + total) % total"
+                        aria-label="Previous screenshot"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <button type="button"
+                        @click="current = (current + 1) % total"
+                        aria-label="Next screenshot"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {% for url in project.image_urls %}
+                    <button type="button"
+                            @click="current = {{ forloop.counter0 }}"
+                            aria-label="Go to screenshot {{ forloop.counter }}"
+                            class="h-1.5 rounded-full transition-all"
+                            :class="current === {{ forloop.counter0 }} ? 'bg-brand-teal w-4' : 'bg-white/60 w-1.5'"></button>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 pb-20">
+    <div class="bg-brand-teal rounded-2xl p-10 text-center">
+      <h3 class="text-2xl font-semibold text-white mb-3">Have a similar challenge?</h3>
+      <p class="text-white/80 mb-6 text-sm">Let us talk about what a custom system could do for your business.</p>
+      <a href="{% url 'engagement:book' %}"
+         class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:text-white transition-all duration-200 text-sm">
+        Book Free Consultation
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
     </div>
-  {% else %}
-    <p class="text-brand-sub">No projects published yet. Add some via the admin.</p>
-  {% endif %}
-</section>
+  </div>
 {% endblock %}

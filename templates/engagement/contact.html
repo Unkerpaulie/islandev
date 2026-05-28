@@ -3,9 +3,106 @@
 {% block title %}Contact — Islan.DEV{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-20">
-  <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">Contact</p>
-  <h1 class="text-4xl font-semibold tracking-tight mb-6">Let us Start a Conversation</h1>
-  <p class="text-brand-sub max-w-2xl">Placeholder — the dual-portal contact form (client / collaborator) will be ported from the redesign.</p>
-</section>
+  {% include 'partials/page_hero.html' with badge='Contact' title='Let us Start a Conversation' subtitle='Whether you are a business looking to modernize your operations or a developer interested in working together — choose your path below.' %}
+
+  <div id="contact" class="max-w-7xl mx-auto px-6 py-16"
+       x-data="{ active: '{{ initial_active }}', done: '{{ success }}' }">
+    <div class="flex flex-col lg:flex-row gap-6">
+      {# Two portals: client and collaborator. Same structure, different copy and inquiry_type. #}
+      {% for portal in portals %}
+        <div class="flex-1 bg-white rounded-2xl border shadow-sm overflow-hidden transition-colors"
+             :class="active === '{{ portal.key }}' ? 'border-brand-teal/40' : 'border-gray-100 hover:border-brand-teal/20'">
+          <div class="p-8">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+                   :class="active === '{{ portal.key }}' ? 'bg-brand-teal text-white' : 'bg-brand-teal/10 text-brand-teal'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  {{ portal.icon_svg|safe }}
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-brand-text">{{ portal.label }}</h2>
+                <p class="text-sm text-brand-sub">{{ portal.sub }}</p>
+              </div>
+            </div>
+
+            {# Collapsed state: show "Get in touch" trigger. #}
+            <div x-show="active !== '{{ portal.key }}'">
+              <button type="button"
+                      @click="active = '{{ portal.key }}'"
+                      class="mt-2 text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
+                Get in touch
+              </button>
+            </div>
+
+            {# Expanded state: form or success message. #}
+            <div x-show="active === '{{ portal.key }}'" x-cloak>
+              <template x-if="done === '{{ portal.key }}'">
+                <div class="py-10 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-teal mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <h3 class="text-lg font-semibold text-brand-text mb-2">Message Received</h3>
+                  <p class="text-sm text-brand-sub">Thank you for reaching out. I will get back to you within 1 - 2 business days.</p>
+                </div>
+              </template>
+
+              <template x-if="done !== '{{ portal.key }}'">
+                <form method="post" action="{% url 'engagement:contact' %}" class="flex flex-col gap-4">
+                  {% csrf_token %}
+                  <input type="hidden" name="inquiry_type" value="{{ portal.key }}">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-medium text-brand-sub mb-1">Full Name</label>
+                      <input name="name" required value="{% if initial_active == portal.key %}{{ form.name.value|default_if_none:'' }}{% endif %}"
+                             class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                             placeholder="Jane Smith">
+                      {% if initial_active == portal.key %}{% for e in form.name.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-brand-sub mb-1">Email Address</label>
+                      <input type="email" name="email" required value="{% if initial_active == portal.key %}{{ form.email.value|default_if_none:'' }}{% endif %}"
+                             class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                             placeholder="jane@company.com">
+                      {% if initial_active == portal.key %}{% for e in form.email.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-brand-sub mb-1">{{ portal.company_label }}</label>
+                    <input name="company" value="{% if initial_active == portal.key %}{{ form.company.value|default_if_none:'' }}{% endif %}"
+                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                           placeholder="{{ portal.company_placeholder }}">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-brand-sub mb-1">{{ portal.message_label }}</label>
+                    <textarea name="message" required rows="5"
+                              class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
+                              placeholder="{{ portal.message_placeholder }}">{% if initial_active == portal.key %}{{ form.message.value|default_if_none:'' }}{% endif %}</textarea>
+                    {% if initial_active == portal.key %}{% for e in form.message.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
+                  </div>
+                  <button type="submit"
+                          class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-teal text-white font-semibold rounded-lg hover:bg-brand-cyan transition-colors text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                    Send Message
+                  </button>
+                </form>
+              </template>
+
+              <button type="button"
+                      @click="active = null; done = null"
+                      class="mt-4 text-xs text-brand-sub hover:text-brand-teal underline">
+                Go back
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_head %}
+<style>[x-cloak] { display: none !important; }</style>
 {% endblock %}

@@ -2,18 +2,14 @@
 
 {% block title %}Islan.DEV — Digital Solutions for SMEs{% endblock %}
 
+{# Home is full-bleed — the hero handles its own top padding to sit beneath the
+   transparent fixed navbar. Override the default pt-16 from base.html. #}
+{% block main_class %}{% endblock %}
+
 {% block content %}
-<section class="max-w-7xl mx-auto px-6 py-20">
-  <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-4">Digital Transformation for SMEs</p>
-  <h1 class="text-4xl lg:text-5xl font-semibold tracking-tight mb-6">
-    Build Systems That <span class="text-brand-teal">Work For You</span>, Not Against You
-  </h1>
-  <p class="text-lg text-brand-sub max-w-2xl mb-8">
-    Scaffold is up. This page is a placeholder — the real home layout (Hero, Services, Why, Portfolio teaser, Newsletter) will be ported from the redesign in the next pass.
-  </p>
-  <div class="flex gap-4">
-    <a href="{% url 'engagement:book' %}" class="inline-flex items-center px-6 py-3 border-2 border-brand-teal text-brand-teal font-semibold rounded-lg hover:bg-brand-teal hover:text-white transition-colors">Book Free Consultation</a>
-    <a href="{% url 'portfolio:list' %}" class="inline-flex items-center px-6 py-3 text-brand-sub font-medium hover:text-brand-teal transition-colors">View Portfolio</a>
-  </div>
-</section>
+  {% include 'core/partials/hero.html' %}
+  {% include 'core/partials/services_grid.html' %}
+  {% include 'core/partials/why.html' %}
+  {% include 'core/partials/portfolio_teaser.html' %}
+  {% include 'core/partials/newsletter.html' %}
 {% endblock %}

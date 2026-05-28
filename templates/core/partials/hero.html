@@ -1,0 +1,67 @@
+{# Hero section — full-bleed, sits beneath the transparent fixed navbar. #}
+<section class="min-h-screen bg-brand-bg flex items-center pt-16">
+  <div class="max-w-7xl mx-auto px-6 w-full py-20">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-16 items-center">
+      <div class="lg:col-span-3">
+        <div class="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-brand-teal uppercase mb-5 px-3 py-1.5 rounded-full border border-brand-teal/30 bg-brand-teal/5">
+          Digital Transformation for SMEs
+        </div>
+        <h1 class="text-4xl lg:text-5xl xl:text-6xl font-semibold text-brand-text leading-tight tracking-tight mb-6">
+          Build Systems That
+          <span class="text-brand-teal">Work For You</span>,<br>
+          Not Against You
+        </h1>
+        <p class="text-lg text-brand-sub leading-relaxed mb-8 max-w-xl">
+          From consultation to deployment — I design and build custom web applications,
+          dashboards, and digital workflows that match exactly how your business operates.
+        </p>
+
+        <div class="flex flex-wrap gap-4 mb-8">
+          <span class="flex items-center gap-1.5 text-sm text-brand-sub">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Web Applications
+          </span>
+          <span class="flex items-center gap-1.5 text-sm text-brand-sub">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Business Intelligence
+          </span>
+          <span class="flex items-center gap-1.5 text-sm text-brand-sub">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            SOP Development
+          </span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'engagement:book' %}"
+             class="inline-flex items-center justify-center gap-2 px-7 py-3.5 border-2 border-brand-teal text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:border-brand-cyan hover:text-white transition-all duration-200 text-sm">
+            Schedule Free Consultation
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+          <a href="{% url 'portfolio:list' %}"
+             class="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-brand-sub font-medium hover:text-brand-teal transition-colors text-sm">
+            View My Work
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2 hidden lg:block relative">
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+          {# TODO: replace with a local hero image in static/images/ once you have one. #}
+          <img src="https://media.base44.com/images/public/6a14934cd034978bb3c4cb7e/d60481040_generated_image.png"
+               alt="Business dashboard preview"
+               class="w-full h-[520px] object-cover object-left">
+          <div class="absolute inset-0"
+               style="background: linear-gradient(to right, #ECEDF0 0%, transparent 40%);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
