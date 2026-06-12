@@ -25,7 +25,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['lightbulb'],
         'title': 'Digital Consultation',
         'tagline': 'Clarity before code.',
-        'desc': 'Clarity-first discovery sessions that map your business processes and define a practical digital roadmap.',
+        'desc': 'We start by understanding how your business works today, then help discover opportunities to reduce friction, improve visibility, and create a practical digital roadmap.',
         'desc_long': 'Before any technology is chosen, we map your business — its processes, pain points, team structure, and goals. The outcome is a clear, prioritized digital roadmap that guides every decision forward.',
         'deliverables': [
             'Process mapping sessions',
@@ -38,7 +38,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['clipboard-list'],
         'title': 'SOP Development',
         'tagline': 'Consistency at scale.',
-        'desc': 'Document and standardize your operations so your team works consistently and confidently.',
+        'desc': 'Turn your own business know-how into clear, repeatable processes that keep work flowing smoothly and help your team stay aligned as you grow.',
         'desc_long': 'Standard Operating Procedures are the backbone of a scalable business. I work with your team to document, refine, and digitize your operational workflows so everyone knows exactly what to do and when.',
         'deliverables': [
             'Process interviews and documentation',
@@ -51,7 +51,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['monitor'],
         'title': 'Custom Web Applications',
         'tagline': 'Built for your business, not a template.',
-        'desc': 'Bespoke dashboard-driven systems built exactly for how your business operates and who uses them.',
+        'desc': 'Tailored dashboard-driven systems designed around your people, your processes, and the way your business naturally operates.',
         'desc_long': 'Every custom application starts from a deep understanding of how your team works. The result is a dashboard-driven system with data entry, reporting, and access controls designed specifically for your operations.',
         'deliverables': [
             'Role-based dashboards',
@@ -64,7 +64,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['bar-chart'],
         'title': 'Business Intelligence',
         'tagline': 'Turn your data into decisions.',
-        'desc': 'KPI dashboards, internal reports, and performance monitors that give you real insight.',
+        'desc': 'Monitor your business pulse, track performance, and make confident decisions based on real metrics you can access at your fingertips.',
         'desc_long': 'Visibility drives performance. I build internal reporting systems, KPI dashboards, and data visualizations that give managers and owners a real-time view of what is actually happening in their business.',
         'deliverables': [
             'KPI dashboard design',
@@ -77,7 +77,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['receipt'],
         'title': 'Invoice and Estimate Systems',
         'tagline': 'Professional billing, built in.',
-        'desc': 'Professional billing instruments integrated into your existing workflow.',
+        'desc': 'Create professional estimates and invoices without the manual repetition, keeping your billing process simple and organized.',
         'desc_long': 'Eliminate manual invoice creation and spreadsheet estimates. I build integrated billing instruments that generate, track, and record all client-facing documents directly within your business system.',
         'deliverables': [
             'Branded invoice generator',
@@ -90,7 +90,7 @@ SERVICES = [
         'icon_svg': _LUCIDE['database'],
         'title': 'Data Architecture',
         'tagline': 'Structure that supports growth.',
-        'desc': 'Clean, structured databases and data pipelines designed to grow with your business.',
+        'desc': 'Build a strong, secure foundation for your information with clean, structured data that stays reliable and in your control as your business evolves.',
         'desc_long': 'Many businesses are trapped by their own data because it was never structured properly. I design and build clean relational databases and data pipelines that grow with your business and integrate across your tools.',
         'deliverables': [
             'Database schema design',
@@ -106,17 +106,17 @@ REASONS = [
     {
         'icon_svg': _LUCIDE['user-check'],
         'title': 'Built Around Your Team',
-        'desc': 'Every system I build is designed around who uses it and how they work — not a generic template.',
+        'desc': 'The best systems are the ones people actually enjoy using. Every solution is shaped around your team&apos;s day-to-day workflow, making adoption feel natural and training feel simple.',
     },
     {
         'icon_svg': _LUCIDE['puzzle'],
         'title': 'End-to-End Ownership',
-        'desc': 'From scoping and process mapping to development and deployment, I handle the full journey.',
+        'desc': 'From the first conversation to deployment and beyond, you&apos;ll work with the same person who took the time to understand your business from the start.',
     },
     {
         'icon_svg': _LUCIDE['layers'],
         'title': 'Right-Sized for SMEs',
-        'desc': 'Enterprise capability at a scale and cost that makes sense for growing businesses.',
+        'desc': 'Get the structure, visibility, and control of larger business systems without the complexity, overhead, or price tag that often comes with them.',
     },
 ]
 
