@@ -1,4 +1,5 @@
 from datetime import date, time
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
@@ -68,50 +69,70 @@ class SubscribeViewTests(TestCase):
 
 
 class ContactViewTests(TestCase):
-    def test_get_renders_page(self):
+    """Tests for the unified contact/booking page (mode=contact path)."""
+
+    def test_get_default_renders_contact_mode(self):
         response = self.client.get(reverse('engagement:contact'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'I Need Digital Solutions')
-        self.assertContains(response, 'I Want to Collaborate')
+        self.assertContains(response, 'Let\'s Start a Conversation')
+        # initial_mode context should default to contact when no ?mode param
+        self.assertEqual(response.context['initial_mode'], 'contact')
 
-    def test_valid_post_creates_inquiry_and_redirects(self):
+    def test_get_with_mode_book_sets_initial_mode(self):
+        response = self.client.get(reverse('engagement:contact') + '?mode=book')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['initial_mode'], 'book')
+
+    @patch('engagement.views.send_contact_email')
+    def test_valid_contact_post_creates_inquiry_and_redirects(self, mock_email):
         response = self.client.post(reverse('engagement:contact'), {
-            'inquiry_type': 'client',
+            'mode': 'contact',
             'name': 'Jane Smith',
             'email': 'jane@example.com',
             'company': 'Acme',
             'message': 'I need a custom dashboard.',
         })
         self.assertEqual(response.status_code, 302)
-        self.assertIn('success=client', response['Location'])
+        self.assertIn('success=contact', response['Location'])
         inquiry = ContactInquiry.objects.get(email='jane@example.com')
         self.assertEqual(inquiry.inquiry_type, ContactInquiry.InquiryType.CLIENT)
+        mock_email.assert_called_once_with(inquiry)
 
-    def test_invalid_inquiry_type_rejected(self):
+    @patch('engagement.views.send_contact_email')
+    def test_contact_missing_required_fields_returns_400(self, mock_email):
         response = self.client.post(reverse('engagement:contact'), {
-            'inquiry_type': 'hacker',
-            'name': 'X', 'email': 'x@example.com', 'message': 'hi',
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(ContactInquiry.objects.exists())
-
-    def test_missing_required_fields_rejected(self):
-        response = self.client.post(reverse('engagement:contact'), {
-            'inquiry_type': 'collaborator',
+            'mode': 'contact',
             'name': '', 'email': 'not-an-email', 'message': '',
         })
         self.assertEqual(response.status_code, 400)
         self.assertFalse(ContactInquiry.objects.exists())
+        mock_email.assert_not_called()
+
+    def test_get_success_contact_shows_confirmation(self):
+        response = self.client.get(reverse('engagement:contact') + '?success=contact')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Message Received')
+
+    def test_get_success_booking_shows_confirmation(self):
+        response = self.client.get(reverse('engagement:contact') + '?success=booking')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Booking Request Received')
 
 
 class BookViewTests(TestCase):
-    def test_get_renders_form(self):
-        response = self.client.get(reverse('engagement:book'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Book a Discovery Call')
+    """Tests for the unified contact/booking page (mode=booking path) and the
+    legacy /book/ redirect."""
 
-    def test_valid_post_creates_booking_and_redirects(self):
-        response = self.client.post(reverse('engagement:book'), {
+    def test_legacy_book_url_redirects_to_contact(self):
+        response = self.client.get(reverse('engagement:book'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/contact/', response['Location'])
+        self.assertIn('mode=book', response['Location'])
+
+    @patch('engagement.views.send_booking_email')
+    def test_valid_booking_post_creates_booking_and_redirects(self, mock_email):
+        response = self.client.post(reverse('engagement:contact'), {
+            'mode': 'booking',
             'name': 'Pat Lee',
             'email': 'pat@example.com',
             'business_name': 'Pat Co',
@@ -121,25 +142,20 @@ class BookViewTests(TestCase):
             'message': 'Looking to digitize ops.',
         })
         self.assertEqual(response.status_code, 302)
+        self.assertIn('success=booking', response['Location'])
         booking = BookingRequest.objects.get(email='pat@example.com')
-        self.assertIn(f'booked={booking.pk}', response['Location'])
         self.assertEqual(booking.status, BookingRequest.Status.PENDING)
+        mock_email.assert_called_once_with(booking)
 
-    def test_missing_required_fields_rejected(self):
-        response = self.client.post(reverse('engagement:book'), {
-            'name': '', 'email': 'bad', 'preferred_date': '', 'preferred_time': '',
+    @patch('engagement.views.send_booking_email')
+    def test_booking_missing_date_time_returns_400(self, mock_email):
+        response = self.client.post(reverse('engagement:contact'), {
+            'mode': 'booking',
+            'name': 'Pat Lee',
+            'email': 'pat@example.com',
+            'preferred_date': '',
+            'preferred_time': '',
         })
         self.assertEqual(response.status_code, 400)
         self.assertFalse(BookingRequest.objects.exists())
-
-    def test_booked_param_shows_confirmation(self):
-        booking = BookingRequest.objects.create(
-            name='Pat Lee',
-            email='pat@example.com',
-            preferred_date=date(2030, 6, 15),
-            preferred_time=time(10, 0),
-        )
-        response = self.client.get(reverse('engagement:book') + f'?booked={booking.pk}')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Consultation Request Received')
-        self.assertContains(response, 'Pat Lee')
+        mock_email.assert_not_called()

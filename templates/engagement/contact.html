@@ -3,103 +3,207 @@
 {% block title %}Contact — Islan.DEV{% endblock %}
 
 {% block content %}
-  {% include 'partials/page_hero.html' with badge='Contact' title='Let us Start a Conversation' subtitle='Whether you are a business looking to modernize your operations or a developer interested in working together — choose your path below.' %}
+  {% include 'partials/page_hero.html' with badge='Get In Touch' title='Let\'s Start a Conversation' subtitle='Book a free discovery call, or just drop me a message. Either way I will get back to you within 1 business day.' %}
 
-  <div id="contact" class="max-w-7xl mx-auto px-6 py-16"
-       x-data="{ active: '{{ initial_active }}', done: '{{ success }}' }">
-    <div class="flex flex-col lg:flex-row gap-6">
-      {# Two portals: client and collaborator. Same structure, different copy and inquiry_type. #}
-      {% for portal in portals %}
-        <div class="flex-1 bg-white rounded-2xl border shadow-sm overflow-hidden transition-colors"
-             :class="active === '{{ portal.key }}' ? 'border-brand-teal/40' : 'border-gray-100 hover:border-brand-teal/20'">
-          <div class="p-8">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
-                   :class="active === '{{ portal.key }}' ? 'bg-brand-teal text-white' : 'bg-brand-teal/10 text-brand-teal'">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  {{ portal.icon_svg|safe }}
-                </svg>
+  <div id="contact" class="max-w-2xl mx-auto px-6 py-16">
+
+    {# ── Success state ─────────────────────────────────────────── #}
+    {% if success %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+        <div class="w-16 h-16 rounded-full bg-brand-teal/10 flex items-center justify-center mx-auto mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        {% if success == 'booking' %}
+          <h2 class="text-2xl font-semibold text-brand-text mb-3">Booking Request Received</h2>
+          <p class="text-brand-sub text-sm leading-relaxed">
+            Thank you for reaching out. I will review your request and confirm the appointment within 1 business day via email.
+          </p>
+        {% else %}
+          <h2 class="text-2xl font-semibold text-brand-text mb-3">Message Received</h2>
+          <p class="text-brand-sub text-sm leading-relaxed">
+            Thank you for reaching out. I will get back to you within 1–2 business days.
+          </p>
+        {% endif %}
+        <a href="{% url 'engagement:contact' %}"
+           class="mt-8 inline-block text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
+          ← Send another message
+        </a>
+      </div>
+
+    {# ── Form state ────────────────────────────────────────────── #}
+    {% else %}
+      <div x-data="{ booking: {% if initial_mode == 'book' %}true{% else %}false{% endif %} }">
+
+        {# Toggle switch #}
+        <div class="flex items-center justify-center gap-4 mb-10">
+          <span class="text-sm font-medium select-none transition-colors"
+                :class="!booking ? 'text-brand-teal' : 'text-brand-sub'">Send a Message</span>
+
+          <button type="button"
+                  @click="booking = !booking"
+                  :aria-pressed="booking.toString()"
+                  aria-label="Toggle between sending a message and booking a consultation"
+                  class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2"
+                  :class="booking ? 'bg-brand-teal' : 'bg-gray-300'">
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                  :class="booking ? 'translate-x-6' : 'translate-x-0'"></span>
+          </button>
+
+          <span class="text-sm font-medium select-none transition-colors"
+                :class="booking ? 'text-brand-teal' : 'text-brand-sub'">Book a Consultation</span>
+        </div>
+
+        {# Form card #}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 lg:p-10">
+          <form method="post" action="{% url 'engagement:contact' %}#contact" class="flex flex-col gap-5" novalidate>
+            {% csrf_token %}
+            {# Hidden mode field — Alpine keeps this in sync with the toggle. #}
+            <input type="hidden" name="mode" :value="booking ? 'booking' : 'contact'">
+
+            {# Dynamic heading #}
+            <div class="mb-1">
+              <h2 x-show="booking" x-cloak class="text-xl font-semibold text-brand-text">Book a Free Discovery Call</h2>
+              <p x-show="booking" x-cloak class="text-sm text-brand-sub mt-1 leading-relaxed">
+                30 minutes, no pressure, no sales pitch. Pick a time and I will confirm within 1 business day.
+              </p>
+              <h2 x-show="!booking" class="text-xl font-semibold text-brand-text">Send Me a Message</h2>
+              <p x-show="!booking" class="text-sm text-brand-sub mt-1 leading-relaxed">
+                Have a question, a project idea, or just want to connect? I would love to hear from you.
+              </p>
+            </div>
+
+            {# ── Booking-only fields ─────────────────────────── #}
+            <div x-show="booking" x-cloak
+                 x-transition:enter="transition-all ease-out duration-300"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition-all ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 class="flex flex-col gap-4">
+
+              <div>
+                <label class="block text-xs font-medium text-brand-sub mb-1">Service Interest</label>
+                <select name="service_interest"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
+                  <option value="">Select a service (optional)…</option>
+                  {% for value, label in service_choices %}
+                    <option value="{{ value }}"
+                      {% if booking_form.service_interest.value == value %}selected{% endif %}>
+                      {{ label }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-brand-sub mb-1">Business / Company Name <span class="text-brand-sub/60 font-normal">(optional)</span></label>
+                <input name="business_name"
+                       value="{{ booking_form.business_name.value|default_if_none:'' }}"
+                       class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                       placeholder="Acme Ltd.">
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-brand-sub mb-1">Preferred Date *</label>
+                  <select name="preferred_date"
+                          class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.preferred_date.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
+                    <option value="">Select a date…</option>
+                    {% for d in dates %}
+                      <option value="{{ d|date:'Y-m-d' }}"
+                        {% if booking_form.preferred_date.value|stringformat:'s' == d|date:'Y-m-d' %}selected{% endif %}>
+                        {{ d|date:'D, M j' }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% for e in booking_form.preferred_date.errors %}
+                    <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                  {% endfor %}
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-brand-sub mb-1">Preferred Time *</label>
+                  <select name="preferred_time"
+                          class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.preferred_time.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
+                    <option value="">Select a time…</option>
+                    {% for label, value in time_slots %}
+                      <option value="{{ value }}"
+                        {% if booking_form.preferred_time.value|stringformat:'s' == value %}selected{% endif %}>
+                        {{ label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% for e in booking_form.preferred_time.errors %}
+                    <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {# ── End booking-only fields ─────────────────────── #}
+
+            {# ── Core fields (always visible) ────────────────── #}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-brand-sub mb-1">Full Name *</label>
+                <input name="name" required
+                       value="{{ booking_form.name.value|default_if_none:''}}{{ contact_form.name.value|default_if_none:'' }}"
+                       class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.name.errors or contact_form.name.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                       placeholder="Jane Smith">
+                {% for e in booking_form.name.errors %}
+                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                {% endfor %}
+                {% for e in contact_form.name.errors %}
+                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                {% endfor %}
               </div>
               <div>
-                <h2 class="text-lg font-semibold text-brand-text">{{ portal.label }}</h2>
-                <p class="text-sm text-brand-sub">{{ portal.sub }}</p>
+                <label class="block text-xs font-medium text-brand-sub mb-1">Email Address *</label>
+                <input type="email" name="email" required
+                       value="{{ booking_form.email.value|default_if_none:''}}{{ contact_form.email.value|default_if_none:'' }}"
+                       class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.email.errors or contact_form.email.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                       placeholder="jane@company.com">
+                {% for e in booking_form.email.errors %}
+                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                {% endfor %}
+                {% for e in contact_form.email.errors %}
+                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+                {% endfor %}
               </div>
             </div>
 
-            {# Collapsed state: show "Get in touch" trigger. #}
-            <div x-show="active !== '{{ portal.key }}'">
-              <button type="button"
-                      @click="active = '{{ portal.key }}'"
-                      class="mt-2 text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
-                Get in touch
-              </button>
+            <div>
+              <label class="block text-xs font-medium text-brand-sub mb-1"
+                     x-text="booking ? 'Brief Description' : 'Your Message *'"></label>
+              <textarea name="message" rows="5" :required="!booking"
+                        class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.message.errors or contact_form.message.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
+                        :placeholder="booking ? 'What are you trying to achieve or improve? (optional)' : 'What would you like to talk about?'"
+                        >{{ booking_form.message.value|default_if_none:''}}{{ contact_form.message.value|default_if_none:'' }}</textarea>
+              {% for e in booking_form.message.errors %}
+                <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+              {% endfor %}
+              {% for e in contact_form.message.errors %}
+                <p class="text-xs text-red-600 mt-1">{{ e }}</p>
+              {% endfor %}
             </div>
+            {# ── End core fields ─────────────────────────────── #}
 
-            {# Expanded state: form or success message. #}
-            <div x-show="active === '{{ portal.key }}'" x-cloak>
-              <template x-if="done === '{{ portal.key }}'">
-                <div class="py-10 text-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-teal mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                  </svg>
-                  <h3 class="text-lg font-semibold text-brand-text mb-2">Message Received</h3>
-                  <p class="text-sm text-brand-sub">Thank you for reaching out. I will get back to you within 1 - 2 business days.</p>
-                </div>
-              </template>
-
-              <template x-if="done !== '{{ portal.key }}'">
-                <form method="post" action="{% url 'engagement:contact' %}" class="flex flex-col gap-4">
-                  {% csrf_token %}
-                  <input type="hidden" name="inquiry_type" value="{{ portal.key }}">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs font-medium text-brand-sub mb-1">Full Name</label>
-                      <input name="name" required value="{% if initial_active == portal.key %}{{ form.name.value|default_if_none:'' }}{% endif %}"
-                             class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
-                             placeholder="Jane Smith">
-                      {% if initial_active == portal.key %}{% for e in form.name.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-brand-sub mb-1">Email Address</label>
-                      <input type="email" name="email" required value="{% if initial_active == portal.key %}{{ form.email.value|default_if_none:'' }}{% endif %}"
-                             class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
-                             placeholder="jane@company.com">
-                      {% if initial_active == portal.key %}{% for e in form.email.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-brand-sub mb-1">{{ portal.company_label }}</label>
-                    <input name="company" value="{% if initial_active == portal.key %}{{ form.company.value|default_if_none:'' }}{% endif %}"
-                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
-                           placeholder="{{ portal.company_placeholder }}">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-medium text-brand-sub mb-1">{{ portal.message_label }}</label>
-                    <textarea name="message" required rows="5"
-                              class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
-                              placeholder="{{ portal.message_placeholder }}">{% if initial_active == portal.key %}{{ form.message.value|default_if_none:'' }}{% endif %}</textarea>
-                    {% if initial_active == portal.key %}{% for e in form.message.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}{% endif %}
-                  </div>
-                  <button type="submit"
-                          class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-teal text-white font-semibold rounded-lg hover:bg-brand-cyan transition-colors text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                    Send Message
-                  </button>
-                </form>
-              </template>
-
-              <button type="button"
-                      @click="active = null; done = null"
-                      class="mt-4 text-xs text-brand-sub hover:text-brand-teal underline">
-                Go back
-              </button>
-            </div>
-          </div>
+            <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-teal text-white font-semibold rounded-lg hover:bg-brand-cyan transition-colors text-sm mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              <span x-show="booking" x-cloak>Request Booking</span>
+              <span x-show="!booking">Send Message</span>
+            </button>
+          </form>
         </div>
-      {% endfor %}
-    </div>
+
+      </div>
+    {% endif %}
+
   </div>
 {% endblock %}
 

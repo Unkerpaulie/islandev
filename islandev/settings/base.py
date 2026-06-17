@@ -90,3 +90,10 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = PROJECT_ROOT / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Email (Resend) ---
+# Notifications are sent for every contact form and booking submission.
+# Leave RESEND_API_KEY blank in dev to disable sending without errors.
+RESEND_API_KEY = env('RESEND_API_KEY', default='')
+RESEND_FROM_EMAIL = env('RESEND_FROM_EMAIL', default='Islan.DEV <hello@islan.dev>')
+CONTACT_NOTIFICATION_EMAIL = env('CONTACT_NOTIFICATION_EMAIL', default='hello@islan.dev')

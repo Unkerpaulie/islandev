@@ -4,37 +4,10 @@ from django.http import HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from .email import send_booking_email, send_contact_email
 from .forms import BookingRequestForm, ContactInquiryForm, SubscriberForm
 from .models import BookingRequest, ContactInquiry
 
-
-INQUIRY_TYPES = {c.value for c in ContactInquiry.InquiryType}
-
-# Presentation data for the two contact portals. Kept here (rather than in a
-# separate content module) because the labels and inquiry_type values are
-# tightly coupled to the view's POST handling.
-CONTACT_PORTALS = [
-    {
-        'key': 'client',
-        'label': 'I Need Digital Solutions',
-        'sub': 'For businesses looking to transform their operations',
-        'icon_svg': '<path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>',
-        'company_label': 'Business / Company Name',
-        'company_placeholder': 'Acme Ltd.',
-        'message_label': 'Tell me about your business challenge',
-        'message_placeholder': 'Describe your current process and what you are trying to improve...',
-    },
-    {
-        'key': 'collaborator',
-        'label': 'I Want to Collaborate',
-        'sub': 'For developers and digital service providers',
-        'icon_svg': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-        'company_label': 'Organization / GitHub / Website',
-        'company_placeholder': 'github.com/yourhandle',
-        'message_label': 'What are you interested in collaborating on?',
-        'message_placeholder': 'Describe your skills, what you are working on, or how you want to connect...',
-    },
-]
 
 # Each slot is (display label, ISO 24-hour value Django's TimeField accepts).
 TIME_SLOTS = [
@@ -58,66 +31,82 @@ def _next_n_weekdays(n=14):
     return days
 
 
-def contact(request):
-    """Two-portal contact page. POST creates a ContactInquiry; the inquiry_type
-    is supplied as a hidden field by whichever portal form was submitted."""
-    if request.method == 'POST':
-        inquiry_type = request.POST.get('inquiry_type', '')
-        form = ContactInquiryForm(request.POST)
-        if inquiry_type in INQUIRY_TYPES and form.is_valid():
-            obj = form.save(commit=False)
-            obj.inquiry_type = inquiry_type
-            obj.save()
-            return redirect(
-                reverse('engagement:contact') + f'?success={inquiry_type}#contact'
-            )
-        return render(request, 'engagement/contact.html', {
-            'form': form,
-            'portals': CONTACT_PORTALS,
-            'initial_active': inquiry_type if inquiry_type in INQUIRY_TYPES else '',
-            'success': '',
-        }, status=400)
-
-    success = request.GET.get('success', '')
-    if success not in INQUIRY_TYPES:
-        success = ''
-    return render(request, 'engagement/contact.html', {
-        'form': ContactInquiryForm(),
-        'portals': CONTACT_PORTALS,
-        'initial_active': success,
+def _contact_context(booking_form=None, contact_form=None, initial_mode='book', success=''):
+    """Build the shared context dict for GET and error-state POST renders."""
+    return {
+        'booking_form': booking_form or BookingRequestForm(),
+        'contact_form': contact_form or ContactInquiryForm(),
+        'time_slots': TIME_SLOTS,
+        'dates': _next_n_weekdays(),
+        'service_choices': BookingRequest.ServiceInterest.choices,
+        'initial_mode': initial_mode,
         'success': success,
-    })
+    }
+
+
+def contact(request):
+    """Unified contact/booking page.
+
+    GET  ?mode=book  → toggle defaults to booking mode (shows date/time fields).
+    GET  (no param)  → toggle defaults to contact/message mode.
+
+    POST mode=booking → validates BookingRequestForm, saves BookingRequest, sends email.
+    POST mode=contact → validates ContactInquiryForm, saves ContactInquiry, sends email.
+
+    On success, redirects back with ?success=<mode> so Alpine can show the
+    confirmation state without re-submitting on refresh.
+    """
+    if request.method == 'POST':
+        mode = request.POST.get('mode', 'contact')
+
+        if mode == 'booking':
+            form = BookingRequestForm(request.POST)
+            if form.is_valid():
+                booking = form.save()
+                send_booking_email(booking)
+                return redirect(
+                    reverse('engagement:contact') + '?success=booking#contact'
+                )
+            return render(request, 'engagement/contact.html',
+                          _contact_context(booking_form=form, initial_mode='book'),
+                          status=400)
+
+        else:  # mode == 'contact'
+            form = ContactInquiryForm(request.POST)
+            if form.is_valid():
+                inquiry = form.save(commit=False)
+                inquiry.inquiry_type = ContactInquiry.InquiryType.CLIENT
+                inquiry.save()
+                send_contact_email(inquiry)
+                return redirect(
+                    reverse('engagement:contact') + '?success=contact#contact'
+                )
+            return render(request, 'engagement/contact.html',
+                          _contact_context(contact_form=form, initial_mode='contact'),
+                          status=400)
+
+    # GET — determine initial toggle state from ?mode=book
+    success = request.GET.get('success', '')
+    if success not in ('booking', 'contact'):
+        success = ''
+
+    raw_mode = request.GET.get('mode', '')
+    initial_mode = 'book' if raw_mode == 'book' else 'contact'
+
+    # After a successful booking keep the toggle on the booking side so the
+    # success message makes visual sense.
+    if success == 'booking':
+        initial_mode = 'book'
+    elif success == 'contact':
+        initial_mode = 'contact'
+
+    return render(request, 'engagement/contact.html',
+                  _contact_context(initial_mode=initial_mode, success=success))
 
 
 def book(request):
-    """Three-step booking page. The wizard UI is Alpine-driven on the client;
-    the server only sees the final submission with all fields filled in."""
-    if request.method == 'POST':
-        form = BookingRequestForm(request.POST)
-        if form.is_valid():
-            booking = form.save()
-            return redirect(
-                reverse('engagement:book') + f'?booked={booking.pk}'
-            )
-        return render(request, 'engagement/book.html', {
-            'form': form,
-            'dates': _next_n_weekdays(),
-            'time_slots': TIME_SLOTS,
-            'service_choices': BookingRequest.ServiceInterest.choices,
-            'booked': None,
-        }, status=400)
-
-    booked_pk = request.GET.get('booked')
-    booked = None
-    if booked_pk and booked_pk.isdigit():
-        booked = BookingRequest.objects.filter(pk=int(booked_pk)).first()
-    return render(request, 'engagement/book.html', {
-        'form': BookingRequestForm(),
-        'dates': _next_n_weekdays(),
-        'time_slots': TIME_SLOTS,
-        'service_choices': BookingRequest.ServiceInterest.choices,
-        'booked': booked,
-    })
+    """Legacy /book/ URL — redirect to the unified contact page in booking mode."""
+    return redirect(reverse('engagement:contact') + '?mode=book')
 
 
 def subscribe(request):
