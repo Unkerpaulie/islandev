@@ -1,33 +1,34 @@
-{# "Why Islan.DEV" section — two columns, copy on the left, reason cards on the right. #}
-<section class="bg-brand-bg py-20 border-t border-brand-cyan/10">
+<!-- "Why Islan.DEV" section: two columns, copy left, reason cards right. id="why" is the scroll target from the hero chevron. -->
+<section id="why" class="bg-brand-bg py-20 border-t border-brand-cyan/10">
   <div class="max-w-7xl mx-auto px-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      <div>
+
+      <!-- Left column: copy -->
+      <div class="fade-in-up">
         <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-3">Why Islan.DEV</p>
         <h2 class="text-3xl lg:text-4xl font-semibold text-brand-text tracking-tight mb-5">
-          A Developer Who <span class="text-brand-teal">Understands You</span>
+          A Developer Who <span class="text-brand-teal">Listens First</span>
         </h2>
         <p class="text-gray-700 leading-relaxed mb-6">
-          Your business has its own culture, its own identity, its own "soul", that you've carefully crafted. Before discussing software, I take the time to understand how you work, how your team works, and what makes your business unique. My only goal is to take what you've built and add efficiency, automation and consistency, so you can give your customers more of what they love about your business, while reducing the menial operational grunt work still needed behind the scenes.
+          Your business has its own culture, its own identity — something you've carefully built. Before touching any technology, I sit with you and your team to understand how work actually flows: your clients, your operations, your finances, and the people who keep it all moving. My job is to fit a system around your world, not the other way around.
         </p>
-        <p class="text-gray-700 leading-relaxed mb-6">
-          A healthy business isn't defined by how hard your people work, but by how smoothly everything works together. By digitizing workflows, automating repetition, and creating reliable systems, your business will operate with greater clarity, consistency, and confidence.
+        <p class="text-gray-700 leading-relaxed mb-8">
+          The result is a business that runs with more clarity, more consistency, and a lot less noise — so you can focus on delivering the quality your customers already love about you.
         </p>
-        <p class="text-gray-700 leading-relaxed mb-6">
-          <span class="text-brand-teal">You've built something valuable. I respect that. My job is to help it thrive.</span> 
-        </p>
-          <a href="{% url 'engagement:book' %}"
-             class="inline-flex items-center justify-center gap-2 px-7 py-3.5 border-2 border-brand-teal text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:border-brand-cyan hover:text-white transition-all duration-200 text-sm">
-            Schedule Free Consultation
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </a>
+        <a href="{% url 'engagement:contact' %}?mode=book"
+           class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-brand-amber text-white font-semibold rounded-lg hover:bg-brand-amber-dark transition-all duration-200 text-sm shadow-md">
+          Book a Free Consultation
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
       </div>
 
+      <!-- Right column: reason cards with staggered fade-in -->
       <div class="flex flex-col gap-5">
         {% for reason in reasons %}
-          <div class="flex gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div class="fade-in-up flex gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm"
+               style="transition-delay: {{ forloop.counter0 }}00ms;">
             <div class="w-10 h-10 rounded-lg bg-brand-teal/10 flex items-center justify-center flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 {{ reason.icon_svg|safe }}
@@ -40,6 +41,7 @@
           </div>
         {% endfor %}
       </div>
+
     </div>
   </div>
 </section>

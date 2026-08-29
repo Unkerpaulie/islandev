@@ -1,15 +1,115 @@
 {% extends 'base.html' %}
 
-{% block title %}Portfolio — Islan.DEV{% endblock %}
+{% block title %}Client Stories — Islan.DEV{% endblock %}
+
+<!-- Full-bleed carousel hero handles its own top clearance; suppress base.html's pt-16. -->
+{% block main_class %}{% endblock %}
 
 {% block content %}
-  {% include 'partials/page_hero.html' with badge='Portfolio' title='Real Systems. Real Results.' subtitle='Every project below is a custom-built system delivered for a real business. Each one started with a problem and ended with a solution the team actually uses every day.' %}
 
+  <!-- Carousel Hero -->
+  <!-- Alpine drives the active index. Slides show title, subheading, and a Read More anchor. -->
+  <section class="bg-brand-bg pt-32 pb-14 border-b border-brand-cyan/10"
+           x-data="{
+             current: 0,
+             total: {{ projects|length }},
+             timer: null,
+             start() { this.timer = setInterval(() => { this.current = (this.current + 1) % this.total }, 7000); },
+             stop()  { clearInterval(this.timer); },
+             go(n)   { this.stop(); this.current = n; this.start(); },
+             prev()  { this.go((this.current - 1 + this.total) % this.total); },
+             next()  { this.go((this.current + 1) % this.total); }
+           }"
+           x-init="start()"
+           @mouseenter="stop()"
+           @mouseleave="start()">
+
+    <div class="max-w-5xl mx-auto px-6">
+      <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-10">Client Stories</p>
+
+      <!-- Slide viewport: fixed height so the section doesn't reflow between slides -->
+      <div class="relative" style="min-height: 200px;">
+        {% for project in projects %}
+          <div x-show="current === {{ forloop.counter0 }}"
+               x-transition:enter="transition ease-out duration-700"
+               x-transition:enter-start="opacity-0 translate-y-4"
+               x-transition:enter-end="opacity-100 translate-y-0"
+               x-transition:leave="transition ease-in duration-500"
+               x-transition:leave-start="opacity-100 translate-y-0"
+               x-transition:leave-end="opacity-0 -translate-y-2"
+               class="absolute inset-0"
+               style="display: none;">
+            <div class="flex flex-col gap-4 max-w-2xl">
+              <span class="inline-block w-fit text-xs font-semibold text-brand-teal bg-brand-teal/10 px-3 py-1 rounded-full">
+                {{ project.client_type }}
+              </span>
+              <h1 class="text-3xl lg:text-4xl xl:text-5xl font-semibold text-brand-text leading-tight tracking-tight">
+                {{ project.title }}
+              </h1>
+              <p class="text-base text-brand-sub leading-relaxed">
+                {{ project.tagline }}
+              </p>
+              <a href="#project-{{ forloop.counter0 }}"
+                 class="inline-flex items-center gap-2 text-sm font-semibold text-brand-teal hover:text-brand-cyan transition-colors w-fit mt-2">
+                Read the Full Story
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Navigation: arrows + dots -->
+      <div class="flex items-center gap-6 mt-12">
+        <!-- Prev arrow -->
+        <button type="button"
+                @click="prev()"
+                aria-label="Previous story"
+                class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+
+        <!-- Dot indicators -->
+        <div class="flex items-center gap-2">
+          {% for project in projects %}
+            <button type="button"
+                    @click="go({{ forloop.counter0 }})"
+                    aria-label="Go to {{ project.title }}"
+                    class="h-2 rounded-full transition-all duration-500"
+                    :class="current === {{ forloop.counter0 }} ? 'bg-brand-teal w-8' : 'bg-brand-teal/25 w-2 hover:bg-brand-teal/50'">
+            </button>
+          {% endfor %}
+        </div>
+
+        <!-- Next arrow -->
+        <button type="button"
+                @click="next()"
+                aria-label="Next story"
+                class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <!-- Slide counter -->
+        <span class="text-xs text-brand-sub ml-2">
+          <span x-text="current + 1"></span> / {{ projects|length }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Detail Sections -->
   <div class="max-w-7xl mx-auto px-6 py-16 flex flex-col gap-16">
     {% for project in projects %}
-      <article class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <article id="project-{{ forloop.counter0 }}"
+               class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden scroll-mt-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-          {# Text column. Order is swapped on odd-index projects for visual rhythm. #}
+          <!-- Text column — alternates side for visual rhythm -->
           <div class="p-8 {% cycle '' 'lg:order-2' %}">
             <div class="flex flex-wrap items-center gap-2 mb-4">
               <span class="text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2.5 py-1 rounded-full">{{ project.client_type }}</span>
@@ -17,7 +117,8 @@
                 <span class="text-xs text-brand-sub bg-gray-100 px-2.5 py-1 rounded-full">{{ tech }}</span>
               {% endfor %}
             </div>
-            <h2 class="text-2xl font-semibold text-brand-text mb-4">{{ project.title }}</h2>
+            <h2 class="text-2xl font-semibold text-brand-text mb-2">{{ project.title }}</h2>
+            <p class="text-sm text-brand-teal font-medium mb-4">{{ project.tagline }}</p>
             <p class="text-sm text-brand-sub leading-relaxed mb-6">{{ project.description }}</p>
             <div class="space-y-2">
               {% for highlight in project.highlights %}
@@ -29,8 +130,7 @@
             </div>
           </div>
 
-          {# Image carousel column. Alpine drives the `current` index; images are
-             stacked absolutely and fade in/out on opacity. #}
+          <!-- Image carousel column -->
           <div class="p-6 bg-brand-bg flex items-center {% cycle '' 'lg:order-1' %}">
             <div x-data="{ current: 0, total: {{ project.image_urls|length }} }"
                  class="relative rounded-xl overflow-hidden bg-gray-100 group w-full h-64">
@@ -74,12 +174,13 @@
     {% endfor %}
   </div>
 
+  <!-- CTA Banner -->
   <div class="max-w-7xl mx-auto px-6 pb-20">
     <div class="bg-brand-teal rounded-2xl p-10 text-center">
       <h3 class="text-2xl font-semibold text-white mb-3">Have a similar challenge?</h3>
-      <p class="text-white/80 mb-6 text-sm">Let us talk about what a custom system could do for your business.</p>
-      <a href="{% url 'engagement:book' %}"
-         class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:text-white transition-all duration-200 text-sm">
+      <p class="text-white/80 mb-6 text-sm">Let's talk about what a custom system could do for your business.</p>
+      <a href="{% url 'engagement:contact' %}?mode=book"
+         class="inline-flex items-center gap-2 px-7 py-3.5 bg-brand-amber text-white font-semibold rounded-lg hover:bg-brand-amber-dark transition-all duration-200 text-sm shadow-md">
         Book Free Consultation
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -87,4 +188,5 @@
       </a>
     </div>
   </div>
+
 {% endblock %}

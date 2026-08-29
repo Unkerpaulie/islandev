@@ -11,7 +11,7 @@ def site(request):
     nav_links = [
         ('Home', 'core:home', reverse('core:home')),
         ('Services', 'core:services', reverse('core:services')),
-        ('Portfolio', 'portfolio:list', reverse('portfolio:list')),
+        ('Client Stories', 'portfolio:list', reverse('portfolio:list')),
         ('Contact', 'engagement:contact', reverse('engagement:contact')),
     ]
     return {

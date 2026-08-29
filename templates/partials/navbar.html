@@ -7,7 +7,7 @@
       <img src="{% static 'images/logo-t.png' %}" alt="Islan.DEV" class="h-11 w-auto">
     </a>
 
-    {# Desktop nav #}
+    <!-- Desktop nav -->
     <div class="hidden md:flex items-center gap-8">
       {% for label, name, url in nav_links %}
         <a href="{{ url }}"
@@ -17,12 +17,12 @@
       {% endfor %}
     </div>
 
-    <a href="{% url 'engagement:book' %}"
-       class="hidden md:inline-flex items-center px-5 py-2.5 rounded-lg border-2 border-brand-teal text-brand-teal text-sm font-semibold transition-all duration-200 hover:bg-brand-cyan hover:border-brand-cyan hover:text-white">
+    <a href="{% url 'engagement:contact' %}?mode=book"
+       class="hidden md:inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-amber text-white text-sm font-semibold transition-all duration-200 hover:bg-brand-amber-dark shadow-sm">
       Book Free Consultation
     </a>
 
-    {# Mobile menu button #}
+    <!-- Mobile menu button -->
     <button type="button"
             data-mobile-toggle
             aria-controls="mobile-panel"
@@ -38,7 +38,7 @@
     </button>
   </div>
 
-  {# Mobile panel #}
+  <!-- Mobile panel -->
   <div id="mobile-panel" data-mobile-panel
        class="hidden md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
     {% for label, name, url in nav_links %}
@@ -47,8 +47,8 @@
         {{ label }}
       </a>
     {% endfor %}
-    <a href="{% url 'engagement:book' %}"
-       class="mt-2 flex justify-center items-center px-5 py-2.5 rounded-lg border-2 border-brand-teal text-brand-teal text-sm font-semibold">
+    <a href="{% url 'engagement:contact' %}?mode=book"
+       class="mt-2 flex justify-center items-center px-5 py-2.5 rounded-lg bg-brand-amber text-white text-sm font-semibold">
       Book Free Consultation
     </a>
   </div>

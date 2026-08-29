@@ -1,52 +1,52 @@
 {% load static %}
-{# Hero section — full-bleed, sits beneath the transparent fixed navbar. #}
+<!-- Hero section — full-bleed, sits beneath the transparent fixed navbar. -->
 <section class="min-h-screen bg-brand-bg flex items-center pt-16 relative overflow-hidden">
   <div class="max-w-7xl mx-auto px-6 w-full py-20 relative">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
       <div class="relative z-10">
         <h1 class="text-4xl lg:text-5xl xl:text-6xl font-semibold text-brand-text leading-tight tracking-tight mb-6">
-          Building Systems That
-          <span class="text-brand-teal">Work For You</span>
+          Your Business Has a Rhythm.
+          <span class="text-brand-teal">Let's Build Around It.</span>
         </h1>
+        <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-xl">
+          You've built something real — a business with its own flow, its own culture, its own way of getting things done. I take the time to understand all of that before writing a single line of code, then build a custom system that fits your team and delivers the control and clarity you need to scale.
+        </p>
         <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-xl">
           Your business is one of a kind, because you are one of a kind. You run your business to work for you. All you need now is the custom digital system that perfectly fits what you've created.
         </p>
-        <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-xl">
-          Your business already has a rhythm that works. I take the time to understand how you operate and build systems that reduce friction and tedium, and make everyday work easier without changing the flow of your business.
-        </p>
 
-        <div class="flex flex-wrap gap-4 mb-8">
+        <div class="flex flex-wrap gap-4 mb-10">
           <span class="flex items-center gap-1.5 text-sm text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            Business Intelligence
+            Custom-built for your workflow
           </span>
           <span class="flex items-center gap-1.5 text-sm text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            Custom Applications
+            Delivered in 4 weeks or less
           </span>
           <span class="flex items-center gap-1.5 text-sm text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-teal flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            SOP Development
+            Free operations consultation
           </span>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4">
-          <a href="{% url 'engagement:book' %}"
-             class="inline-flex items-center justify-center gap-2 px-7 py-3.5 border-2 border-brand-teal text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:border-brand-cyan hover:text-white transition-all duration-200 text-sm">
-            Schedule Free Consultation
+          <a href="{% url 'engagement:contact' %}?mode=book"
+             class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-brand-amber text-white font-semibold rounded-lg hover:bg-brand-amber-dark transition-all duration-200 text-sm shadow-md">
+            Book Free Consultation
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
           </a>
           <a href="{% url 'portfolio:list' %}"
              class="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-brand-sub font-medium hover:text-brand-teal transition-colors text-sm">
-            View My Work
+            See Client Stories
           </a>
         </div>
       </div>
@@ -61,5 +61,14 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Scroll anchor — bouncing chevron links to the why section below. -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce hidden lg:block">
+    <a href="#why" aria-label="Scroll to learn more">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-brand-teal/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </a>
   </div>
 </section>

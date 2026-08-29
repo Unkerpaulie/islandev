@@ -2,6 +2,9 @@
 
 {% block title %}Services — Islan.DEV{% endblock %}
 
+<!-- Services is full-bleed; the hero handles its own top padding. Override base.html's pt-16. -->
+{% block main_class %}{% endblock %}
+
 {% block content %}
   {% include 'partials/page_hero.html' with badge='Services' title='Everything Your Business Needs to Go Digital' subtitle='I offer a complete suite of digital transformation services — from the first consultation call through to a live, running system your team actually uses.' %}
 
@@ -38,8 +41,8 @@
       <p class="text-white/80 mb-6 text-sm max-w-md mx-auto">
         A free consultation is the best first step. We will map out your situation together and I will tell you honestly what you need.
       </p>
-      <a href="{% url 'engagement:book' %}"
-         class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-brand-teal font-semibold rounded-lg hover:bg-brand-cyan hover:text-white transition-all duration-200 text-sm">
+      <a href="{% url 'engagement:contact' %}?mode=book"
+         class="inline-flex items-center gap-2 px-7 py-3.5 bg-brand-amber text-white font-semibold rounded-lg hover:bg-brand-amber-dark transition-all duration-200 text-sm shadow-md">
         Book Free Consultation
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>

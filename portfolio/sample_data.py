@@ -11,6 +11,7 @@ SAMPLE_PROJECTS = [
     {
         'title': 'TropicTrack POS and Inventory',
         'client_type': 'Food and Beverage',
+        'tagline': 'From paper tickets and guesswork to real-time sales clarity across four locations.',
         'tech_stack': ['React', 'Node.js', 'PostgreSQL'],
         'description': (
             'A full point-of-sale and inventory management system for a multi-location '
@@ -34,6 +35,7 @@ SAMPLE_PROJECTS = [
     {
         'title': 'BuildRight Project Hub',
         'client_type': 'Construction and Trades',
+        'tagline': 'Giving a regional contractor full visibility into job costs, subcontractors, and progress — without a single spreadsheet.',
         'tech_stack': ['React', 'Express', 'MySQL'],
         'description': (
             'A project management and job costing platform for a regional construction '
@@ -57,6 +59,7 @@ SAMPLE_PROJECTS = [
     {
         'title': 'RetailFlow Inventory',
         'client_type': 'Retail and Distribution',
+        'tagline': 'Replacing a tangle of spreadsheets with a single system that tracks stock, orders, and customers in real time.',
         'tech_stack': ['React', 'Node.js', 'MongoDB'],
         'description': (
             'An end-to-end inventory and order management application replacing a complex '

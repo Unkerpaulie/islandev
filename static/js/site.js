@@ -43,4 +43,23 @@
       link.addEventListener('click', function () { setOpen(false); });
     });
   }
+  // Scroll-fade: elements with class `fade-in-up` start invisible and
+  // translate slightly downward, then animate to full opacity + position when
+  // they enter the viewport. Uses IntersectionObserver — no library needed.
+  const fadeEls = document.querySelectorAll('.fade-in-up');
+  if (fadeEls.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    fadeEls.forEach(function (el) { observer.observe(el); });
+  } else {
+    // Fallback: just show everything if IntersectionObserver isn't available.
+    fadeEls.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
 })();
