@@ -29,6 +29,7 @@ static/css/*
 # --- Tailwind standalone CLI binary (if dropped next to the project) ---
 tailwindcss
 tailwindcss.exe
+tailwindreload.bat
 
 # --- Secrets ---
 # .env lives at <islandev_root>/.env, outside the repo. Safety net only.
