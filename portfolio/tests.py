@@ -2,6 +2,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import Project
+from .sample_data import SAMPLE_PROJECTS
+from .views import _prepare_story, _split_benefit
 
 
 class ProjectModelTests(TestCase):
@@ -27,7 +29,12 @@ class ProjectListViewTests(TestCase):
         response = self.client.get(reverse('portfolio:list'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['using_sample_data'])
-        self.assertContains(response, 'TropicTrack POS and Inventory')
+        self.assertContains(response, 'Forging a System That Scales')
+
+    def test_hero_shows_description_under_the_tagline(self):
+        response = self.client.get(reverse('portfolio:list'))
+        # Fragment without apostrophes (the template HTML-escapes them).
+        self.assertContains(response, 'Custom gates, fences, window bars')
 
     def test_real_projects_used_when_published(self):
         Project.objects.create(
@@ -42,4 +49,57 @@ class ProjectListViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['using_sample_data'])
         self.assertContains(response, 'Live Project')
-        self.assertNotContains(response, 'TropicTrack POS and Inventory')
+        self.assertNotContains(response, 'Forging a System That Scales')
+
+
+class StoryPreparationTests(TestCase):
+    def test_split_benefit_separates_lead_phrase(self):
+        self.assertEqual(
+            _split_benefit('Quotes in Minutes: The system handles it.'),
+            {'lead': 'Quotes in Minutes', 'text': 'The system handles it.'},
+        )
+
+    def test_split_benefit_without_lead_keeps_whole_text(self):
+        self.assertEqual(
+            _split_benefit('Just a plain sentence.'),
+            {'lead': '', 'text': 'Just a plain sentence.'},
+        )
+
+    def test_split_benefit_ignores_colon_in_a_long_sentence(self):
+        long_sentence = 'x' * 80 + ': and then some more text'
+        self.assertEqual(_split_benefit(long_sentence)['lead'], '')
+
+    def test_story_images_found_from_prefix(self):
+        story = _prepare_story({
+            'title': "Thompson's Steel Fabricators Ltd",
+            'image_prefix': 'Thompson_s_Steel_Fabricators_OS',
+            'benefits': [],
+        })
+        self.assertEqual(story['slug'], 'thompsons-steel-fabricators-ltd')
+        self.assertTrue(story['splash_url'].endswith('Thompson_s_Steel_Fabricators_OS-Splash.jpg'))
+        self.assertGreater(len(story['screenshots']), 0)
+        self.assertTrue(story['screenshots'][0].endswith('Thompson_s_Steel_Fabricators_OS-1.jpg'))
+
+    def test_story_with_no_images_degrades_gracefully(self):
+        story = _prepare_story({'title': 'No Pictures', 'image_prefix': 'does_not_exist'})
+        self.assertIsNone(story['splash_url'])
+        self.assertEqual(story['screenshots'], [])
+
+    def test_every_sample_story_resolves_its_images(self):
+        """Catches a typo'd image_prefix (or a missing/misnamed file) in sample_data.py."""
+        for raw in SAMPLE_PROJECTS:
+            with self.subTest(story=raw['title']):
+                story = _prepare_story(raw)
+                self.assertIsNotNone(
+                    story['splash_url'],
+                    f"No {raw['image_prefix']}-Splash.jpg found in static/images/clientstories/",
+                )
+                self.assertGreater(
+                    len(story['screenshots']), 0,
+                    f"No {raw['image_prefix']}-1.jpg found in static/images/clientstories/",
+                )
+
+    def test_every_sample_story_has_a_description(self):
+        for raw in SAMPLE_PROJECTS:
+            with self.subTest(story=raw['title']):
+                self.assertTrue(raw.get('description', '').strip())

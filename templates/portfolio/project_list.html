@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Client Stories — Islan.DEV{% endblock %}
 
@@ -8,48 +9,44 @@
 {% block content %}
 
   <!-- Carousel Hero -->
-  <!-- Alpine drives the active index. Slides show title, subheading, and a Read More anchor. -->
-  <section class="bg-brand-bg pt-32 pb-14 border-b border-brand-cyan/10"
-           x-data="{
-             current: 0,
-             total: {{ projects|length }},
-             timer: null,
-             start() { this.timer = setInterval(() => { this.current = (this.current + 1) % this.total }, 7000); },
-             stop()  { clearInterval(this.timer); },
-             go(n)   { this.stop(); this.current = n; this.start(); },
-             prev()  { this.go((this.current - 1 + this.total) % this.total); },
-             next()  { this.go((this.current + 1) % this.total); }
-           }"
-           x-init="start()"
-           @mouseenter="stop()"
-           @mouseleave="start()">
+  <!-- storyHero() (static/js/stories.js) drives the active slide. Each slide shows the
+       client type, title, tagline, description, a "Read the Full Story" link and the story's
+       splash image. All slides share one grid cell (.story-slide in input.css), so the section
+       keeps the height of its tallest slide and nothing jumps when slides change.
+       Within a slide, text and splash share a cell too (like the home page hero): the splash
+       sits to the right and fades in from the left, underneath the text (.story-hero-* in
+       input.css). Below lg the splash drops under the text and fades in from the top. -->
+  <section class="bg-brand-bg pt-32 pb-14 border-b border-brand-cyan/10 overflow-hidden"
+           x-data="storyHero({{ projects|length }})"
+           @mouseenter="pause()"
+           @mouseleave="resume()"
+           @focusin="pause()"
+           @focusout="resume()">
 
-    <div class="max-w-5xl mx-auto px-6">
-      <p class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-10">Client Stories</p>
+    <div class="max-w-7xl mx-auto px-6">
+      <h1 class="text-xs font-semibold tracking-widest text-brand-teal uppercase mb-10">Client Stories</h1>
 
-      <!-- Slide viewport: fixed height so the section doesn't reflow between slides -->
-      <div class="relative" style="min-height: 200px;">
+      <div class="grid">
         {% for project in projects %}
-          <div x-show="current === {{ forloop.counter0 }}"
-               x-transition:enter="transition ease-out duration-700"
-               x-transition:enter-start="opacity-0 translate-y-4"
-               x-transition:enter-end="opacity-100 translate-y-0"
-               x-transition:leave="transition ease-in duration-500"
-               x-transition:leave-start="opacity-100 translate-y-0"
-               x-transition:leave-end="opacity-0 -translate-y-2"
-               class="absolute inset-0"
-               style="display: none;">
-            <div class="flex flex-col gap-4 max-w-2xl">
+          <div class="story-slide{% if forloop.first %} is-active{% endif %} grid grid-cols-1 gap-8 items-center"
+               :class="{ 'is-active': current === {{ forloop.counter0 }} }">
+
+            <div class="story-hero-text relative z-10 flex flex-col gap-4">
               <span class="inline-block w-fit text-xs font-semibold text-brand-teal bg-brand-teal/10 px-3 py-1 rounded-full">
                 {{ project.client_type }}
               </span>
-              <h1 class="text-3xl lg:text-4xl xl:text-5xl font-semibold text-brand-text leading-tight tracking-tight">
+              <h2 class="text-4xl xl:text-5xl font-semibold text-brand-text leading-tight tracking-tight">
                 {{ project.title }}
-              </h1>
-              <p class="text-base text-brand-sub leading-relaxed">
+              </h2>
+              <p class="text-lg lg:text-xl xl:text-2xl font-medium text-brand-teal leading-snug">
                 {{ project.tagline }}
               </p>
-              <a href="#project-{{ forloop.counter0 }}"
+              {% if project.description %}
+                <p class="text-lg xl:text-xl text-gray-700 leading-relaxed">
+                  {{ project.description }}
+                </p>
+              {% endif %}
+              <a href="#{{ project.slug }}"
                  class="inline-flex items-center gap-2 text-sm font-semibold text-brand-teal hover:text-brand-cyan transition-colors w-fit mt-2">
                 Read the Full Story
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -57,118 +54,241 @@
                 </svg>
               </a>
             </div>
+
+            {% if project.splash_url %}
+              <!-- The splash is a second route to the same story; the text link above is the
+                   accessible one, so this one stays out of the tab order. -->
+              <a href="#{{ project.slug }}" tabindex="-1" aria-hidden="true" class="story-hero-art block">
+                <img src="{{ project.splash_url }}"
+                     alt="Screens from the custom system built for {{ project.title }}"
+                     width="1200" height="630"
+                     class="w-full h-auto block">
+              </a>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
 
-      <!-- Navigation: arrows + dots -->
-      <div class="flex items-center gap-6 mt-12">
-        <!-- Prev arrow -->
-        <button type="button"
-                @click="prev()"
-                aria-label="Previous story"
-                class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
+      {% if projects|length > 1 %}
+        <!-- Navigation: arrows + dots -->
+        <div class="flex items-center gap-6 mt-12">
+          <!-- Prev arrow -->
+          <button type="button"
+                  @click="prev()"
+                  aria-label="Previous story"
+                  class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
 
-        <!-- Dot indicators -->
-        <div class="flex items-center gap-2">
-          {% for project in projects %}
-            <button type="button"
-                    @click="go({{ forloop.counter0 }})"
-                    aria-label="Go to {{ project.title }}"
-                    class="h-2 rounded-full transition-all duration-500"
-                    :class="current === {{ forloop.counter0 }} ? 'bg-brand-teal w-8' : 'bg-brand-teal/25 w-2 hover:bg-brand-teal/50'">
-            </button>
-          {% endfor %}
+          <!-- Dot indicators -->
+          <div class="flex items-center gap-2">
+            {% for project in projects %}
+              <button type="button"
+                      @click="go({{ forloop.counter0 }})"
+                      aria-label="Go to {{ project.title }}"
+                      class="h-2 rounded-full transition-all duration-500"
+                      :class="{ 'bg-brand-teal w-8': current === {{ forloop.counter0 }}, 'bg-brand-teal/25 w-2 hover:bg-brand-teal/50': current !== {{ forloop.counter0 }} }">
+              </button>
+            {% endfor %}
+          </div>
+
+          <!-- Next arrow -->
+          <button type="button"
+                  @click="next()"
+                  aria-label="Next story"
+                  class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+
+          <!-- Slide counter -->
+          <span class="text-xs text-brand-sub ml-2">
+            <span x-text="current + 1">1</span> / {{ projects|length }}
+          </span>
         </div>
-
-        <!-- Next arrow -->
-        <button type="button"
-                @click="next()"
-                aria-label="Next story"
-                class="w-9 h-9 rounded-full border border-brand-teal/30 flex items-center justify-center text-brand-teal hover:bg-brand-teal hover:text-white hover:border-brand-teal transition-all duration-200 flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </button>
-
-        <!-- Slide counter -->
-        <span class="text-xs text-brand-sub ml-2">
-          <span x-text="current + 1"></span> / {{ projects|length }}
-        </span>
-      </div>
+      {% endif %}
     </div>
   </section>
 
-  <!-- Project Detail Sections -->
+  <!-- Story sections -->
   <div class="max-w-7xl mx-auto px-6 py-16 flex flex-col gap-16">
     {% for project in projects %}
-      <article id="project-{{ forloop.counter0 }}"
-               class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden scroll-mt-20">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+      <article id="{{ project.slug }}"
+               class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-clip scroll-mt-20">
+        <div class="grid grid-cols-1 {% if project.screenshots %}lg:grid-cols-2{% endif %} gap-0">
+
           <!-- Text column — alternates side for visual rhythm -->
-          <div class="p-8 {% cycle '' 'lg:order-2' %}">
+          <div class="p-8 lg:p-10 {% if forloop.counter|divisibleby:2 %}lg:order-2{% endif %}">
             <div class="flex flex-wrap items-center gap-2 mb-4">
               <span class="text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2.5 py-1 rounded-full">{{ project.client_type }}</span>
-              {% for tech in project.tech_stack %}
-                <span class="text-xs text-brand-sub bg-gray-100 px-2.5 py-1 rounded-full">{{ tech }}</span>
-              {% endfor %}
             </div>
             <h2 class="text-2xl font-semibold text-brand-text mb-2">{{ project.title }}</h2>
-            <p class="text-sm text-brand-teal font-medium mb-4">{{ project.tagline }}</p>
-            <p class="text-sm text-brand-sub leading-relaxed mb-6">{{ project.description }}</p>
-            <div class="space-y-2">
-              {% for highlight in project.highlights %}
-                <div class="flex items-start gap-2 text-sm text-brand-sub">
-                  <div class="w-1.5 h-1.5 rounded-full bg-brand-teal mt-1.5 flex-shrink-0"></div>
-                  {{ highlight }}
-                </div>
-              {% endfor %}
-            </div>
+            <p class="text-sm text-brand-teal font-medium mb-6">{{ project.tagline }}</p>
+
+            {% if project.problem %}
+              <h3 class="text-xs font-semibold tracking-widest text-brand-text uppercase mb-2">The Challenge</h3>
+              <p class="text-sm text-brand-sub leading-relaxed mb-6">{{ project.problem }}</p>
+            {% endif %}
+
+            {% if project.solution %}
+              <h3 class="text-xs font-semibold tracking-widest text-brand-text uppercase mb-2">The Solution</h3>
+              <p class="text-sm text-brand-sub leading-relaxed mb-6">{{ project.solution }}</p>
+            {% endif %}
+
+            {% if project.benefits %}
+              <h3 class="text-xs font-semibold tracking-widest text-brand-text uppercase mb-3">What Changed</h3>
+              <div class="space-y-3">
+                {% for benefit in project.benefits %}
+                  <div class="flex items-start gap-2 text-sm text-brand-sub leading-relaxed">
+                    <div class="w-1.5 h-1.5 rounded-full bg-brand-teal mt-2 flex-shrink-0"></div>
+                    <p>
+                      {% if benefit.lead %}<strong class="font-semibold text-brand-text">{{ benefit.lead }}:</strong>{% endif %}
+                      {{ benefit.text }}
+                    </p>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
           </div>
 
-          <!-- Image carousel column -->
-          <div class="p-6 bg-brand-bg flex items-center {% cycle '' 'lg:order-1' %}">
-            <div x-data="{ current: 0, total: {{ project.image_urls|length }} }"
-                 class="relative rounded-xl overflow-hidden bg-gray-100 group w-full h-64">
-              {% for url in project.image_urls %}
-                <img src="{{ url }}" alt="{{ project.title }} screenshot {{ forloop.counter }}"
-                     class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
-                     :class="current === {{ forloop.counter0 }} ? 'opacity-100' : 'opacity-0'">
-              {% endfor %}
+          {% if project.screenshots %}
+            <!-- Screenshot column: mini carousel; clicking opens the full-screen zoom.
+                 screenshotViewer() (static/js/stories.js) holds the shared state, so the
+                 zoom opens on whichever screenshot the mini carousel is showing.
+                 The article is overflow-clip (not -hidden) so the carousel can stay
+                 sticky: the screens remain in view while the text beside them is read. -->
+            <div class="p-6 lg:p-8 bg-brand-bg {% if forloop.counter|divisibleby:2 %}lg:order-1{% endif %}"
+                 x-data="screenshotViewer({{ project.screenshots_json }})">
 
-              {% if project.image_urls|length > 1 %}
+              <div class="lg:sticky lg:top-24">
+              <div class="story-shots relative w-full aspect-video rounded-xl overflow-hidden bg-white shadow-md ring-1 ring-black/5"
+                   @touchstart.passive="touchStart($event)"
+                   @touchend="touchEnd($event)">
+
+                {% for url in project.screenshots %}
+                  <img src="{{ url }}"
+                       alt="{{ project.title }} — screen {{ forloop.counter }} of {{ project.screenshots|length }}"
+                       {% if not forloop.first %}loading="lazy"{% endif %}
+                       class="story-shot{% if forloop.first %} is-active{% endif %} absolute inset-0 w-full h-full object-contain"
+                       :class="{ 'is-active': current === {{ forloop.counter0 }} }">
+                {% endfor %}
+
+                <!-- Zoom trigger: covers the carousel. The tint and magnifier are revealed
+                     by hovering the carousel (see .story-zoom* in input.css). -->
                 <button type="button"
-                        @click="current = (current - 1 + total) % total"
-                        aria-label="Previous screenshot"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="15 18 9 12 15 6"/>
-                  </svg>
+                        x-ref="trigger"
+                        @click="open()"
+                        aria-label="View {{ project.title }} screens full screen"
+                        class="story-zoom absolute inset-0 w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-teal">
+                  <span class="story-zoom-tint absolute inset-0"></span>
+                  <span class="story-zoom-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                  </span>
                 </button>
-                <button type="button"
-                        @click="current = (current + 1) % total"
-                        aria-label="Next screenshot"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </button>
-                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {% for url in project.image_urls %}
+
+                {% if project.screenshots|length > 1 %}
+                  <button type="button"
+                          @click="prev()"
+                          aria-label="Previous screen"
+                          class="story-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                  </button>
+                  <button type="button"
+                          @click="next()"
+                          aria-label="Next screen"
+                          class="story-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+
+                  <!-- Dots sit on a dark pill: the screenshots are mostly white UI, so bare
+                       white dots would vanish. -->
+                  <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 bg-brand-text/60 px-2 py-1.5 rounded-full">
+                    {% for url in project.screenshots %}
+                      <button type="button"
+                              @click="go({{ forloop.counter0 }})"
+                              aria-label="Go to screen {{ forloop.counter }}"
+                              class="h-1.5 rounded-full transition-all"
+                              :class="{ 'bg-white w-4': current === {{ forloop.counter0 }}, 'bg-white/50 w-1.5': current !== {{ forloop.counter0 }} }"></button>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <p class="mt-3 text-xs text-brand-sub text-center">
+                {{ project.screenshots|length }} screen{{ project.screenshots|length|pluralize }} from the live system &middot; tap or click to enlarge
+              </p>
+              </div>
+
+              <!-- Full-screen zoom. Teleported to <body> so no ancestor (overflow, transform)
+                   can clip it. Closes with the X, Esc; arrow keys and swipe navigate. -->
+              <template x-teleport="body">
+                <div x-show="zoomed"
+                     x-transition.opacity.duration.200ms
+                     style="display: none;"
+                     class="story-lightbox fixed inset-0 flex items-center justify-center"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-label="{{ project.title }} screens"
+                     @keydown.tab="trapTab($event)"
+                     @keydown.escape.window="zoomed && close()"
+                     @keydown.arrow-left.window="zoomed && prev()"
+                     @keydown.arrow-right.window="zoomed && next()"
+                     @touchstart.passive="touchStart($event)"
+                     @touchend="touchEnd($event)">
+
+                  <p class="absolute top-5 left-5 right-20 text-sm font-medium text-white/70 truncate">{{ project.title }}</p>
+
+                  <button type="button"
+                          x-ref="close"
+                          @click="close()"
+                          aria-label="Close full screen view"
+                          class="story-lightbox-btn absolute top-4 right-4 w-11 h-11 rounded-full text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+
+                  <img :src="urls[current]"
+                       :alt="'Screen ' + (current + 1) + ' of ' + total"
+                       draggable="false"
+                       class="story-lightbox-img rounded-lg shadow-2xl select-none">
+
+                  {% if project.screenshots|length > 1 %}
                     <button type="button"
-                            @click="current = {{ forloop.counter0 }}"
-                            aria-label="Go to screenshot {{ forloop.counter }}"
-                            class="h-1.5 rounded-full transition-all"
-                            :class="current === {{ forloop.counter0 }} ? 'bg-brand-teal w-4' : 'bg-white/60 w-1.5'"></button>
-                  {% endfor %}
+                            @click="prev()"
+                            aria-label="Previous screen"
+                            class="story-lightbox-btn absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"/>
+                      </svg>
+                    </button>
+                    <button type="button"
+                            @click="next()"
+                            aria-label="Next screen"
+                            class="story-lightbox-btn absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </button>
+                  {% endif %}
+
+                  <p class="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-white/70 tabular-nums">
+                    <span x-text="current + 1"></span> / <span x-text="total"></span>
+                  </p>
                 </div>
-              {% endif %}
+              </template>
             </div>
-          </div>
+          {% endif %}
         </div>
       </article>
     {% endfor %}
@@ -189,4 +309,9 @@
     </div>
   </div>
 
+{% endblock %}
+
+{% block extra_body %}
+  <!-- Deliberately NOT deferred: it must register Alpine components before Alpine starts. -->
+  <script src="{% static 'js/stories.js' %}"></script>
 {% endblock %}

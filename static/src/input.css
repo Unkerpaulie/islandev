@@ -31,3 +31,171 @@
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   border-bottom: 1px solid rgb(0 188 212 / 0.3);
 }
+
+/* ---------------------------------------------------------------------------
+   Client stories (templates/portfolio/project_list.html, static/js/stories.js)
+   Unlayered on purpose, same reason as the navbar block above.
+   --------------------------------------------------------------------------- */
+
+/* Hero carousel: every slide occupies the same grid cell, so the section is as
+   tall as its tallest slide and never reflows when slides change. `visibility`
+   is delayed on the way out so the fade can finish, and keeps hidden slides'
+   links out of the tab order. The first slide is server-rendered `.is-active`,
+   so the hero still shows if Alpine is slow to load. */
+.story-slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
+}
+.story-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0s;
+}
+
+/* Hero slide, built exactly like the home page hero (templates/core/partials/hero.html):
+   the splash sits on the right and a page-coloured gradient laid OVER it fades the
+   LEFT edge only, so the artwork seems to emerge from under the text. Top, bottom and
+   right edges are left alone, as on the home page, and the corners are rounded-xl.
+
+   Text and splash occupy the SAME grid cell, so the slide is as tall as the taller of
+   the two and both are centered in it.
+
+     --story-fade  how far across the splash the left fade reaches (home page: 45%).
+     #ECEDF0       the page background (tailwind `brand-bg`). If you ever change the
+                   hero background, change it in the two gradients below as well.
+
+   Because the fade is a coloured overlay, the splash's own left edge should be empty
+   background (see portfolio/sample_data.py): any device drawn in the leftmost part of
+   the artwork is washed out by the fade.
+
+   Below lg the splash stacks under the text, bleeds to the screen edges, and fades in
+   from the top instead of the left. */
+.story-hero-art {
+  --story-fade: 45%;
+  position: relative;
+  overflow: hidden;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+}
+.story-hero-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #ECEDF0 0%, rgba(236, 237, 240, 0) 30%);
+}
+@media (min-width: 1024px) {
+  .story-hero-text {
+    grid-area: 1 / 1;
+    width: 42%;
+  }
+  .story-hero-art {
+    grid-area: 1 / 1;
+    justify-self: end;
+    /* Home anchors its image to the container's padding edge (right: 0 inside px-6), so
+       it runs 1.5rem past the content column. The negative margin reproduces that, and
+       60% of the (narrower) content box is the same pixel width as home's 58%. */
+    width: 60%;
+    margin-left: 0;
+    margin-right: -1.5rem;
+    border-radius: 0.75rem;
+  }
+  .story-hero-art::after {
+    background: linear-gradient(to right, #ECEDF0 0%, rgba(236, 237, 240, 0) var(--story-fade));
+  }
+}
+
+/* Screenshot carousel (mini and zoomed share the same active-slide logic). */
+.story-shot {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.story-shot.is-active {
+  opacity: 1;
+}
+
+/* Hover affordance on the mini carousel: a tint plus a semi-transparent
+   magnifier. Driven by hovering the whole carousel (.story-shots), not just the
+   zoom button, so the tint doesn't flicker off when the pointer reaches an arrow. */
+.story-zoom {
+  cursor: zoom-in;
+}
+.story-zoom-tint {
+  background-color: rgb(26 26 46 / 0);
+  transition: background-color 0.25s ease;
+}
+.story-zoom-icon {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.35));
+}
+.story-shots:hover .story-zoom-tint,
+.story-zoom:focus-visible .story-zoom-tint {
+  background-color: rgb(26 26 46 / 0.45);
+}
+.story-shots:hover .story-zoom-icon,
+.story-zoom:focus-visible .story-zoom-icon {
+  opacity: 0.85;
+  transform: scale(1);
+}
+
+/* Prev/next arrows appear on hover (or keyboard focus). Touch screens have no
+   hover, so there they are always visible. */
+.story-nav {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.story-shots:hover .story-nav,
+.story-nav:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .story-nav {
+    opacity: 1;
+  }
+}
+
+/* Full-screen zoom. z-index sits above the fixed navbar (z-50). The backdrop is
+   near-opaque and blurred so neither the navbar nor the page text ghosts through. */
+.story-lightbox {
+  z-index: 100;
+  background-color: rgb(6 6 12 / 0.97);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* Controls float over the screenshot itself, which is mostly white UI, so they
+   need their own dark backing to stay visible. */
+.story-lightbox-btn {
+  background-color: rgb(10 10 20 / 0.7);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+.story-lightbox-btn:hover {
+  background-color: rgb(10 10 20 / 0.9);
+}
+/* Fill the screen: as wide as 94vw allows, but never so wide that a 16:9 screenshot
+   would be taller than 84vh. (Other ratios are letterboxed by object-fit.) */
+.story-lightbox-img {
+  width: min(94vw, calc(84vh * 16 / 9));
+  height: auto;
+  max-height: 84vh;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-slide,
+  .story-slide.is-active,
+  .story-shot,
+  .story-zoom-tint,
+  .story-zoom-icon,
+  .story-nav {
+    transition: none;
+  }
+  .story-slide {
+    transform: none;
+  }
+}
