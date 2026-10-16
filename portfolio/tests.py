@@ -1,9 +1,31 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Project
 from .sample_data import SAMPLE_PROJECTS
 from .views import _prepare_story, _split_benefit
+
+
+# Prod settings have SECURE_SSL_REDIRECT=True, which the test client
+# follows as a 301 before the view ever runs. Suppressing it here is the
+# standard fix and doesn't change production behaviour.
+BASE_OVERRIDES = dict(SECURE_SSL_REDIRECT=False, SECURE_HSTS_SECONDS=0)
+
+# prod.py uses CompressedManifestStaticFilesStorage, which requires a
+# pre-built staticfiles manifest (created by collectstatic in Step 6 of
+# the deploy script). Tests run in Step 5, so the manifest may be stale
+# or missing entries for newly added files, causing static() to raise
+# ValueError even though the file physically exists in STATICFILES_DIRS.
+# Overriding to the plain storage makes static() return a direct URL
+# without needing the manifest, giving correct results in tests without
+# changing production behaviour at all.
+STATIC_OVERRIDES = dict(
+    **BASE_OVERRIDES,
+    STORAGES={
+        'default':     {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    },
+)
 
 
 class ProjectModelTests(TestCase):
@@ -24,6 +46,7 @@ class ProjectModelTests(TestCase):
         self.assertIsNone(project.cover_image)
 
 
+@override_settings(**BASE_OVERRIDES)
 class ProjectListViewTests(TestCase):
     def test_sample_data_used_when_no_projects(self):
         response = self.client.get(reverse('portfolio:list'))
@@ -52,6 +75,7 @@ class ProjectListViewTests(TestCase):
         self.assertNotContains(response, 'Forging a System That Scales')
 
 
+@override_settings(**STATIC_OVERRIDES)
 class StoryPreparationTests(TestCase):
     def test_split_benefit_separates_lead_phrase(self):
         self.assertEqual(
