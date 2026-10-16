@@ -2,184 +2,256 @@
 
 {% block title %}Contact — Islan.DEV{% endblock %}
 
-<!-- No page hero here — the form starts directly under the navbar. -->
 {% block main_class %}pt-16{% endblock %}
 
 {% block content %}
-  <div id="contact" class="max-w-2xl mx-auto px-6 py-16">
+<div id="contact" class="max-w-2xl mx-auto px-6 py-16">
 
-    <!-- Success state -->
-    {% if success %}
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-        <div class="w-16 h-16 rounded-full bg-brand-teal/10 flex items-center justify-center mx-auto mb-5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-        </div>
-        {% if success == 'booking' %}
-          <h2 class="text-2xl font-semibold text-brand-text mb-3">Booking Request Received</h2>
-          <p class="text-brand-sub text-sm leading-relaxed">
-            Thank you for reaching out. I will review your request and confirm the appointment within 1 business day via email.
-          </p>
-        {% else %}
-          <h2 class="text-2xl font-semibold text-brand-text mb-3">Message Received</h2>
-          <p class="text-brand-sub text-sm leading-relaxed">
-            Thank you for reaching out. I will get back to you within 1–2 business days.
-          </p>
-        {% endif %}
-        <a href="{% url 'engagement:contact' %}"
-           class="mt-8 inline-block text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
-          ← Send another message
-        </a>
+  {# ── Success state ──────────────────────────────────────────── #}
+  {% if success %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+      <div class="w-16 h-16 rounded-full bg-brand-teal/10 flex items-center justify-center mx-auto mb-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand-teal" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
       </div>
 
-    <!-- Form state -->
-    {% else %}
-      <div x-data="{ booking: {% if initial_mode == 'book' %}true{% else %}false{% endif %} }">
+      {% if success == 'workshop' %}
+        <h2 class="text-2xl font-semibold text-brand-text mb-3">Workshop Request Received</h2>
+        <p class="text-brand-sub text-sm leading-relaxed">
+          Got it — I'll be in touch within 1 business day to set up your free Business Systems Workshop.
+        </p>
+      {% else %}
+        <h2 class="text-2xl font-semibold text-brand-text mb-3">Message Received</h2>
+        <p class="text-brand-sub text-sm leading-relaxed">
+          Thank you for reaching out. I'll get back to you within 1–2 business days.
+        </p>
+      {% endif %}
 
-        <!-- Page heading -->
-        <div class="mb-8 text-center">
-          <h1 class="text-3xl font-semibold text-brand-text tracking-tight mb-2">Get In Touch</h1>
-          <p class="text-brand-sub text-sm leading-relaxed">
-            Book a free discovery call, or just send me a message. I get back to you within 1 business day.
-          </p>
+      <a href="{% url 'engagement:contact' %}"
+         class="mt-8 inline-block text-sm font-medium text-brand-teal hover:text-brand-cyan transition-colors">
+        ← Send another message
+      </a>
+    </div>
+
+  {# ── Form state ─────────────────────────────────────────────── #}
+  {% else %}
+    <div x-data="{ workshop: {% if initial_mode == 'workshop' %}true{% else %}false{% endif %} }">
+
+      {# Page heading #}
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-semibold text-brand-text tracking-tight mb-2">Get In Touch</h1>
+        <p class="text-brand-sub text-sm leading-relaxed">
+          Book a free Business Systems Workshop, or send me a message.
+        </p>
+      </div>
+
+      {# Toggle switch #}
+      <div class="flex items-center justify-center gap-3 mb-10">
+        <span class="text-sm font-medium select-none transition-colors w-36 text-right"
+              :class="!workshop ? 'text-brand-teal' : 'text-brand-sub'">Send a Message</span>
+
+        <button type="button"
+                @click="workshop = !workshop"
+                :aria-pressed="workshop.toString()"
+                aria-label="Toggle between sending a message and booking a workshop"
+                class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 flex-shrink-0"
+                :class="workshop ? 'bg-brand-teal' : 'bg-gray-300'">
+          <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                :class="workshop ? 'translate-x-6' : 'translate-x-0'"></span>
+        </button>
+
+        <span class="text-sm font-medium select-none transition-colors w-36 text-left"
+              :class="workshop ? 'text-brand-teal' : 'text-brand-sub'">Book a Workshop</span>
+      </div>
+
+      {# Submission error banner (shown when the agents endpoint fails) #}
+      {% if submission_error %}
+        <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 leading-relaxed">
+          Something went wrong on our end — your details were not saved. Please try again
+          or email me directly at
+          <a href="mailto:hello@islan.dev" class="font-semibold underline">hello@islan.dev</a>.
         </div>
+      {% endif %}
 
-        <!-- Toggle switch — centred, evenly spaced -->
-        <div class="flex items-center justify-center gap-3 mb-10">
-          <span class="text-sm font-medium select-none transition-colors w-36 text-right"
-                :class="!booking ? 'text-brand-teal' : 'text-brand-sub'">Send a Message</span>
-
-          <button type="button"
-                  @click="booking = !booking"
-                  :aria-pressed="booking.toString()"
-                  aria-label="Toggle between sending a message and booking a consultation"
-                  class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 flex-shrink-0"
-                  :class="booking ? 'bg-brand-teal' : 'bg-gray-300'">
-            <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
-                  :class="booking ? 'translate-x-6' : 'translate-x-0'"></span>
-          </button>
-
-          <span class="text-sm font-medium select-none transition-colors w-36 text-left"
-                :class="booking ? 'text-brand-teal' : 'text-brand-sub'">Book a Consultation</span>
-        </div>
-
-        <!-- Form card -->
+      {# ── Workshop intake form ─────────────────────────────────── #}
+      <div x-show="workshop" x-cloak
+           x-transition:enter="transition-all ease-out duration-300"
+           x-transition:enter-start="opacity-0 -translate-y-1"
+           x-transition:enter-end="opacity-100 translate-y-0">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 lg:p-10">
-          <form method="post" action="{% url 'engagement:contact' %}#contact" class="flex flex-col gap-5" novalidate>
+
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-brand-text">Book a Free Business Systems Workshop</h2>
+            <p class="text-sm text-brand-sub mt-1 leading-relaxed">
+              30 minutes. I'll map how your business operates today, identify where it's
+              losing time, and show you what a purpose-built system would actually change.
+            </p>
+          </div>
+
+          <form method="post" action="{% url 'engagement:contact' %}#contact"
+                class="flex flex-col gap-5" novalidate>
             {% csrf_token %}
-            <!-- Hidden mode field: Alpine keeps this in sync with the toggle. -->
-            <input type="hidden" name="mode" :value="booking ? 'booking' : 'contact'">
+            <input type="hidden" name="mode" value="workshop">
 
-            <!-- Dynamic heading -->
-            <div class="mb-1">
-              <h2 x-show="booking" x-cloak class="text-xl font-semibold text-brand-text">Book a Free Discovery Call</h2>
-              <p x-show="booking" x-cloak class="text-sm text-brand-sub mt-1 leading-relaxed">
-                30 minutes, no pressure, no sales pitch. I confirm within 1 business day.
+            {# Business info #}
+            <div>
+              <p class="text-xs font-semibold tracking-wide text-brand-sub/70 uppercase mb-3">
+                About Your Business
               </p>
-              <h2 x-show="!booking" class="text-xl font-semibold text-brand-text">Send Me a Message</h2>
-              <p x-show="!booking" class="text-sm text-brand-sub mt-1 leading-relaxed">
-                Have a question, a project idea, or just want to connect? I would love to hear from you.
-              </p>
-            </div>
-
-            <!-- Booking-only fields -->
-            <div x-show="booking" x-cloak
-                 x-transition:enter="transition-all ease-out duration-300"
-                 x-transition:enter-start="opacity-0 -translate-y-2"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 x-transition:leave="transition-all ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 -translate-y-2"
-                 class="flex flex-col gap-4">
-
-              <div>
-                <label class="block text-xs font-medium text-brand-sub mb-1">Service Interest</label>
-                <select name="service_interest"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
-                  <option value="">Select a service (optional)…</option>
-                  {% for value, label in service_choices %}
-                    <option value="{{ value }}"
-                      {% if booking_form.service_interest.value == value %}selected{% endif %}>
-                      {{ label }}
-                    </option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-brand-sub mb-1">
-                  Business / Company Name
-                  <span class="text-brand-sub/60 font-normal">(optional)</span>
-                </label>
-                <input name="business_name"
-                       value="{{ booking_form.business_name.value|default_if_none:'' }}"
-                       class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
-                       placeholder="Acme Ltd.">
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-4">
                 <div>
-                  <label class="block text-xs font-medium text-brand-sub mb-1">Preferred Date *</label>
-                  <select name="preferred_date"
-                          class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.preferred_date.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
-                    <option value="">Select a date…</option>
-                    {% for d in dates %}
-                      <option value="{{ d|date:'Y-m-d' }}"
-                        {% if booking_form.preferred_date.value|stringformat:'s' == d|date:'Y-m-d' %}selected{% endif %}>
-                        {{ d|date:'D, M j' }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                  {% for e in booking_form.preferred_date.errors %}
+                  <label class="block text-xs font-medium text-brand-sub mb-1">
+                    Business / Company Name <span class="text-red-400">*</span>
+                  </label>
+                  <input name="company_name" required
+                         value="{{ workshop_form.company_name.value|default_if_none:'' }}"
+                         class="w-full px-4 py-2.5 rounded-lg border
+                                {% if workshop_form.company_name.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                                text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                         placeholder="Acme Services Ltd.">
+                  {% for e in workshop_form.company_name.errors %}
                     <p class="text-xs text-red-600 mt-1">{{ e }}</p>
                   {% endfor %}
                 </div>
 
                 <div>
-                  <label class="block text-xs font-medium text-brand-sub mb-1">Preferred Time *</label>
-                  <select name="preferred_time"
-                          class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.preferred_time.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white">
-                    <option value="">Select a time…</option>
-                    {% for label, value in time_slots %}
-                      <option value="{{ value }}"
-                        {% if booking_form.preferred_time.value|stringformat:'s' == value %}selected{% endif %}>
-                        {{ label }}
-                      </option>
+                  <label class="block text-xs font-medium text-brand-sub mb-1">
+                    Industry / Type of Business
+                    <span class="text-brand-sub/60 font-normal">(optional)</span>
+                  </label>
+                  <input name="industry"
+                         value="{{ workshop_form.industry.value|default_if_none:'' }}"
+                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                         placeholder="e.g. Construction, Accounting, Healthcare">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-brand-sub mb-1">
+                    What's your biggest operational challenge?
+                    <span class="text-brand-sub/60 font-normal">(optional — helps me prepare)</span>
+                  </label>
+                  <textarea name="description" rows="3"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
+                            placeholder="e.g. We can't track jobs across our team, everything is in notebooks and WhatsApp…"
+                            >{{ workshop_form.description.value|default_if_none:'' }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            {# Divider #}
+            <div class="border-t border-gray-100 pt-5">
+              <p class="text-xs font-semibold tracking-wide text-brand-sub/70 uppercase mb-3">
+                Your Contact Details
+              </p>
+              <div class="flex flex-col gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-brand-sub mb-1">
+                      Your Name <span class="text-red-400">*</span>
+                    </label>
+                    <input name="name" required
+                           value="{{ workshop_form.name.value|default_if_none:'' }}"
+                           class="w-full px-4 py-2.5 rounded-lg border
+                                  {% if workshop_form.name.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                                  text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                           placeholder="Jane Smith">
+                    {% for e in workshop_form.name.errors %}
+                      <p class="text-xs text-red-600 mt-1">{{ e }}</p>
                     {% endfor %}
-                  </select>
-                  {% for e in booking_form.preferred_time.errors %}
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-brand-sub mb-1">
+                      Your Title / Role
+                      <span class="text-brand-sub/60 font-normal">(optional)</span>
+                    </label>
+                    <input name="role"
+                           value="{{ workshop_form.role.value|default_if_none:'' }}"
+                           class="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                           placeholder="Owner, Director, Operations Manager…">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-brand-sub mb-1">
+                    Email Address <span class="text-red-400">*</span>
+                  </label>
+                  <input type="email" name="email" required
+                         value="{{ workshop_form.email.value|default_if_none:'' }}"
+                         class="w-full px-4 py-2.5 rounded-lg border
+                                {% if workshop_form.email.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                                text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                         placeholder="jane@yourcompany.com">
+                  {% for e in workshop_form.email.errors %}
                     <p class="text-xs text-red-600 mt-1">{{ e }}</p>
                   {% endfor %}
                 </div>
               </div>
             </div>
-            <!-- End booking-only fields -->
 
-            <!-- Core fields (always visible) -->
+            <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-amber
+                           text-white font-semibold rounded-lg hover:bg-brand-amber-dark
+                           transition-colors text-sm mt-1 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Request a Free Workshop
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {# ── Contact / message form ───────────────────────────────── #}
+      <div x-show="!workshop"
+           x-transition:enter="transition-all ease-out duration-300"
+           x-transition:enter-start="opacity-0 -translate-y-1"
+           x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 lg:p-10">
+
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-brand-text">Send Me a Message</h2>
+            <p class="text-sm text-brand-sub mt-1 leading-relaxed">
+              Have a question, a project idea, or just want to connect? I'd love to hear from you.
+            </p>
+          </div>
+
+          <form method="post" action="{% url 'engagement:contact' %}#contact"
+                class="flex flex-col gap-5" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="contact">
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-medium text-brand-sub mb-1">Full Name *</label>
+                <label class="block text-xs font-medium text-brand-sub mb-1">
+                  Your Name <span class="text-red-400">*</span>
+                </label>
                 <input name="name" required
-                       value="{{ booking_form.name.value|default_if_none:''}}{{ contact_form.name.value|default_if_none:'' }}"
-                       class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.name.errors or contact_form.name.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                       value="{{ contact_form.name.value|default_if_none:'' }}"
+                       class="w-full px-4 py-2.5 rounded-lg border
+                              {% if contact_form.name.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                              text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
                        placeholder="Jane Smith">
-                {% for e in booking_form.name.errors %}
-                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
-                {% endfor %}
                 {% for e in contact_form.name.errors %}
                   <p class="text-xs text-red-600 mt-1">{{ e }}</p>
                 {% endfor %}
               </div>
               <div>
-                <label class="block text-xs font-medium text-brand-sub mb-1">Email Address *</label>
+                <label class="block text-xs font-medium text-brand-sub mb-1">
+                  Email Address <span class="text-red-400">*</span>
+                </label>
                 <input type="email" name="email" required
-                       value="{{ booking_form.email.value|default_if_none:''}}{{ contact_form.email.value|default_if_none:'' }}"
-                       class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.email.errors or contact_form.email.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
-                       placeholder="jane@company.com">
-                {% for e in booking_form.email.errors %}
-                  <p class="text-xs text-red-600 mt-1">{{ e }}</p>
-                {% endfor %}
+                       value="{{ contact_form.email.value|default_if_none:'' }}"
+                       class="w-full px-4 py-2.5 rounded-lg border
+                              {% if contact_form.email.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                              text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white"
+                       placeholder="jane@yourcompany.com">
                 {% for e in contact_form.email.errors %}
                   <p class="text-xs text-red-600 mt-1">{{ e }}</p>
                 {% endfor %}
@@ -187,36 +259,39 @@
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-brand-sub mb-1"
-                     x-text="booking ? 'Brief Description (optional)' : 'Your Message *'"></label>
-              <textarea name="message" rows="5" :required="!booking"
-                        class="w-full px-4 py-2.5 rounded-lg border {% if booking_form.message.errors or contact_form.message.errors %}border-red-400{% else %}border-gray-200{% endif %} text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
-                        :placeholder="booking ? 'What are you trying to achieve or improve?' : 'What would you like to talk about?'"
-                        >{{ booking_form.message.value|default_if_none:''}}{{ contact_form.message.value|default_if_none:'' }}</textarea>
-              {% for e in booking_form.message.errors %}
-                <p class="text-xs text-red-600 mt-1">{{ e }}</p>
-              {% endfor %}
+              <label class="block text-xs font-medium text-brand-sub mb-1">
+                Your Message <span class="text-red-400">*</span>
+              </label>
+              <textarea name="message" rows="5" required
+                        class="w-full px-4 py-2.5 rounded-lg border
+                               {% if contact_form.message.errors %}border-red-400{% else %}border-gray-200{% endif %}
+                               text-sm text-brand-text focus:outline-none focus:border-brand-teal bg-white resize-none"
+                        placeholder="What would you like to talk about?"
+                        >{{ contact_form.message.value|default_if_none:'' }}</textarea>
               {% for e in contact_form.message.errors %}
                 <p class="text-xs text-red-600 mt-1">{{ e }}</p>
               {% endfor %}
             </div>
-            <!-- End core fields -->
 
             <button type="submit"
-                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-amber text-white font-semibold rounded-lg hover:bg-brand-amber-dark transition-colors text-sm mt-1 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-amber
+                           text-white font-semibold rounded-lg hover:bg-brand-amber-dark
+                           transition-colors text-sm mt-1 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>
-              <span x-show="booking" x-cloak>Request Booking</span>
-              <span x-show="!booking">Send Message</span>
+              Send Message
             </button>
           </form>
         </div>
-
       </div>
-    {% endif %}
 
-  </div>
+    </div>
+  {% endif %}
+
+</div>
 {% endblock %}
 
 {% block extra_head %}

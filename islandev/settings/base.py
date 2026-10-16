@@ -92,8 +92,15 @@ MEDIA_ROOT = PROJECT_ROOT / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- Email (Resend) ---
-# Notifications are sent for every contact form and booking submission.
-# Leave RESEND_API_KEY blank in dev to disable sending without errors.
+# RESEND_API_KEY is no longer used by islandev's own views (intake goes through
+# the agents system), but kept here in case other notification paths are added.
 RESEND_API_KEY = env('RESEND_API_KEY', default='')
 RESEND_FROM_EMAIL = env('RESEND_FROM_EMAIL', default='Islan.DEV <hello@islan.dev>')
-CONTACT_NOTIFICATION_EMAIL = env('CONTACT_NOTIFICATION_EMAIL', default='hello@islan.dev')
+
+# --- Agents system integration ---
+# AGENTS_INTAKE_URL: base URL of the agents internal API, e.g.
+#   https://agents.islan.dev/internal  (no trailing slash)
+#   http://127.0.0.1:8055/internal     (for local dev pointing at local agents)
+# Leave both blank in dev to disable forwarding without raising errors.
+AGENTS_INTAKE_URL    = env('AGENTS_INTAKE_URL', default='')
+AGENTS_INTAKE_SECRET = env('AGENTS_INTAKE_SECRET', default='')

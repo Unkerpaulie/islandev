@@ -5,7 +5,8 @@ from . import views
 app_name = 'engagement'
 
 urlpatterns = [
-    path('book/', views.book, name='book'),
-    path('contact/', views.contact, name='contact'),
+    path('contact/', views.contact,   name='contact'),
     path('subscribe/', views.subscribe, name='subscribe'),
+    # /book/ is removed — the booking concept has been replaced by the
+    # workshop intake form on the unified /contact/ page.
 ]
