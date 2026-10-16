@@ -6,21 +6,18 @@ from .sample_data import SAMPLE_PROJECTS
 from .views import _prepare_story, _split_benefit
 
 
-# Prod settings have SECURE_SSL_REDIRECT=True, which the test client
-# follows as a 301 before the view ever runs. Suppressing it here is the
-# standard fix and doesn't change production behaviour.
-BASE_OVERRIDES = dict(SECURE_SSL_REDIRECT=False, SECURE_HSTS_SECONDS=0)
-
-# prod.py uses CompressedManifestStaticFilesStorage, which requires a
-# pre-built staticfiles manifest (created by collectstatic in Step 6 of
-# the deploy script). Tests run in Step 5, so the manifest may be stale
-# or missing entries for newly added files, causing static() to raise
-# ValueError even though the file physically exists in STATICFILES_DIRS.
-# Overriding to the plain storage makes static() return a direct URL
-# without needing the manifest, giving correct results in tests without
-# changing production behaviour at all.
-STATIC_OVERRIDES = dict(
-    **BASE_OVERRIDES,
+# Prod settings have SECURE_SSL_REDIRECT=True (causes 301 in tests) and use
+# CompressedManifestStaticFilesStorage (requires a current staticfiles manifest
+# to resolve {% static %} tags in templates). Both are overridden here so all
+# template-rendering tests work correctly regardless of deployment state.
+#
+# Why storage override: the manifest is built by collectstatic (Step 5 in
+# redeploy.sh, now running before tests). The storage override is kept as a
+# belt-and-suspenders measure so tests remain green even if the script order
+# ever changes, or if a file is added between deployments.
+BASE_OVERRIDES = dict(
+    SECURE_SSL_REDIRECT=False,
+    SECURE_HSTS_SECONDS=0,
     STORAGES={
         'default':     {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
         'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
@@ -75,7 +72,7 @@ class ProjectListViewTests(TestCase):
         self.assertNotContains(response, 'Forging a System That Scales')
 
 
-@override_settings(**STATIC_OVERRIDES)
+@override_settings(**BASE_OVERRIDES)
 class StoryPreparationTests(TestCase):
     def test_split_benefit_separates_lead_phrase(self):
         self.assertEqual(

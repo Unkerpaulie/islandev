@@ -163,7 +163,7 @@ run_migrations() {
 # =============================================================================
 
 run_tests() {
-    log_section "Step 5: Running Tests"
+    log_section "Step 6: Running Tests"
 
     # Count test files across all apps — skip step if none exist yet
     TEST_COUNT=$(find . -name "tests*.py" -not -path "./.git/*" | wc -l)
@@ -199,7 +199,7 @@ run_tests() {
 # =============================================================================
 
 collect_static() {
-    log_section "Step 6: Collecting Static Files"
+    log_section "Step 5: Collecting Static Files"
 
     python manage.py collectstatic --noinput --clear || {
         log_error "collectstatic failed"
@@ -267,8 +267,8 @@ main() {
     activate_venv
     install_deps
     run_migrations
+    collect_static   # runs before tests so the manifest is current when templates render
     run_tests
-    collect_static
     restart_service
 
     log_section "✅ Redeploy Completed Successfully"

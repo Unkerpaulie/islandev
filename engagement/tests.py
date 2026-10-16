@@ -28,7 +28,19 @@ from .models import Subscriber
 # and doesn't change what is tested in production.
 # ---------------------------------------------------------------------------
 
-BASE_OVERRIDES = dict(SECURE_SSL_REDIRECT=False, SECURE_HSTS_SECONDS=0)
+BASE_OVERRIDES = dict(
+    SECURE_SSL_REDIRECT=False,
+    SECURE_HSTS_SECONDS=0,
+    # Prod settings use CompressedManifestStaticFilesStorage, which requires a
+    # current staticfiles manifest to resolve {% static %} tags in templates.
+    # Plain StaticFilesStorage returns direct URLs without needing the manifest,
+    # making all template-rendering tests reliable regardless of whether
+    # collectstatic has run yet in this deployment cycle.
+    STORAGES={
+        'default':     {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    },
+)
 
 
 # ---------------------------------------------------------------------------
